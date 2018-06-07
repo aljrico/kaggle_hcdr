@@ -83,7 +83,8 @@ application_train <- fread("data/application_train.csv")
 application_train %>% 
 	ggplot(aes(x = AMT_INCOME_TOTAL)) +
 	geom_histogram(fill = "deepskyblue1", colour = "black") +
-	theme_minimal()
+	theme_minimal() +
+	scale_y_log10()
 ```
 
 ### AMT_GOODS_PRICE
