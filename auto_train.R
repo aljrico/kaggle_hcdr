@@ -28,7 +28,6 @@ cat_pos <- c()
 for(i in 1:length(features)) if(class(train_df2[,i]) == "factor" | class(train_df2[,i]) == "character") cat_pos <- c(cat_pos, i)
 train_df2 <- createDummyFeatures(train_df2, cols = NULL)
 
-createDummyFeatures(train_df2)
 
 for(f in features) {
 	if ((class(train_df2[[f]])=="factor") || (class(train_df2[[f]])=="character")) {
