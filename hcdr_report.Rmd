@@ -1,0 +1,213 @@
+---
+title: "Home Credit Default Risk"
+output:
+  rmdformats::material:
+    highlight: kate
+theme: cosmo
+highlight: haddock
+df_print: paged
+code_folding: hide
+number_sections: true
+---
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(fig.width=12, fig.height=8, fig.path='Figs/',
+                      echo=FALSE, warning=FALSE, message=FALSE)
+```
+
+
+
+# Introduction
+
+Home Credit strives to broaden financial inclusion for the unbanked population by providing a positive and safe borrowing experience. In order to make sure this underserved population has a positive loan experience, Home Credit makes use of a variety of alternative data--including telco and transactional information--to predict their clients' repayment abilities.
+
+While Home Credit is currently using various statistical and machine learning methods to make these predictions, they're challenging Kagglers to help them unlock the full potential of their data. Doing so will ensure that clients capable of repayment are not rejected and that loans are given with a principal, maturity, and repayment calendar that will empower their clients to be successful.
+
+```{r}
+library(tidyverse)
+library(data.table)
+library(randomForest)
+library(mice)
+library(mlr)
+library(scales)
+library(waffle)
+library(viridis)
+source("na_replace.R")
+```
+
+# Loading Data
+
+Let us start taking a look at the dimensions of the data.
+
+> Dataset | (rows, columns)
+
+```{r}
+application_train <- fread("data/application_train.csv")
+application_test <- fread("data/application_test.csv")
+bureau <- fread("data/bureau.csv")
+bureau_balance <- fread("data/bureau_balance.csv")
+credit_card_balance <- fread("data/credit_card_balance.csv")
+installments_payments <- fread("data/installments_payments.csv")
+pos_cash_balance <- fread("data/POS_CASH_balance.csv")
+
+print(paste0("Application Train | ","(" ,  dim(application_train)[[1]], ",", dim(application_train)[[2]], ")"))
+print(paste0("Bureau | ","(" ,  dim(bureau)[[1]], ",", dim(bureau)[[2]], ")"))
+print(paste0("Bureau Balance | ","(" ,  dim(bureau_balance)[[1]], ",", dim(bureau_balance)[[2]], ")"))
+print(paste0("Credit Card Balance | ","(" ,  dim(credit_card_balance)[[1]], ",", dim(credit_card_balance)[[2]], ")"))
+print(paste0("Installments Payments | ","(" ,  dim(installments_payments)[[1]], ",", dim(installments_payments)[[2]], ")"))
+print(paste0("POS CASH Balance | ","(" ,  dim(pos_cash_balance)[[1]], ",", dim(pos_cash_balance)[[2]], ")"))
+
+rm(application_train, application_test, bureau, bureau_balance, credit_card_balance, installments_payments, pos_cash_balance)
+```
+
+# Exploratory Analysis
+
+## Distributions
+
+### AMT_CREDIT
+
+```{r}
+application_train <- fread("data/application_train.csv")
+
+application_train %>% 
+	ggplot(aes(x = AMT_CREDIT)) +
+	geom_histogram(fill = "deepskyblue1", colour = "black") +
+	theme_minimal()
+```
+
+### AMT_INCOME_TOTAL
+
+```{r}
+application_train <- fread("data/application_train.csv")
+
+application_train %>% 
+	ggplot(aes(x = AMT_INCOME_TOTAL)) +
+	geom_histogram(fill = "deepskyblue1", colour = "black") +
+	theme_minimal()
+```
+
+### AMT_GOODS_PRICE
+
+```{r}
+application_train <- fread("data/application_train.csv")
+
+application_train %>% 
+	ggplot(aes(x = AMT_GOODS_PRICE)) +
+	geom_histogram(fill = "deepskyblue1", colour = "black") +
+	theme_minimal()
+```
+
+
+## Poportions
+
+### Who accompanied the client?
+
+In this plot we can see an unnamed category. This caregory refers to the rest of Type Suites together.
+
+```{r}
+application_train <- fread("data/application_train.csv")
+
+df <- application_train %>% 
+	na.omit() %>% 
+	mutate(NAME_TYPE_SUITE = ifelse(NAME_TYPE_SUITE == "", "Other_C", NAME_TYPE_SUITE)) %>% 
+	group_by(NAME_TYPE_SUITE) %>% 
+	summarise(n = n()/nrow(application_train %>% na.omit()))
+
+vals <- c(df["n"])[[1]]
+val_names <- sprintf("%s (%s)", c("Children", 
+																	"Family",
+																	"Group of People",
+																	"Other_A",
+																	"Other_B",
+																	"Other_C",
+																	"Spouse",
+																	"Unaccompanied"), scales::percent(round(vals/sum(vals), 6)))
+names(vals) <- val_names
+
+waffle::waffle(round(vals*100), rows = 5) +
+  scale_fill_viridis(discrete=TRUE,name=NULL)
+```
+
+We can see that our data is extremely unbalanced.
+
+
+
+### How many people actually paid back the loan?
+
+```{r}
+application_train <- fread("data/application_train.csv")
+	
+df <- application_train %>% 
+	na.omit() %>% 
+	group_by(TARGET) %>% 
+	summarise(n = n()/nrow(application_train %>% na.omit())) 
+
+vals <- c(df["n"])[[1]]
+val_names <- sprintf("%s (%s)", c("Paid", "Did not pay"), scales::percent(round(vals/sum(vals), 2)))
+names(vals) <- val_names
+
+waffle::waffle(round(vals*100), rows = 4) +
+  scale_fill_viridis(discrete=TRUE,name=NULL)
+```
+
+### Types of Loan
+
+- **Rovolving loans** : Arrangement which allows for the loan amount to be withdrawn, repaid, and redrawn again in any manner and any number of times, until the arrangement expires. Credit card loans and overdrafts are revolving loans. Also called evergreen loan
+
+```{r}
+application_train <- fread("data/application_train.csv")
+	
+df <- application_train %>% 
+	na.omit() %>% 
+	group_by(NAME_CONTRACT_TYPE) %>% 
+	summarise(n = n()/nrow(application_train %>% na.omit())) 
+
+vals <- c(df["n"])[[1]]
+val_names <- sprintf("%s (%s)", c("Cash Loans", "Revolving Loans"), scales::percent(round(vals/sum(vals), 2)))
+names(vals) <- val_names
+
+waffle::waffle(round(vals*100), rows = 4) +
+  scale_fill_viridis(discrete=TRUE,name=NULL)
+```
+
+### Income Sources
+
+
+```{r}
+application_train <- fread("data/application_train.csv")
+	
+df <- application_train %>% 
+	na.omit() %>% 
+	group_by(NAME_INCOME_TYPE) %>% 
+	summarise(n = n()/nrow(application_train %>% na.omit())) 
+
+vals <- c(df["n"])[[1]]
+val_names <- sprintf("%s (%s)", c("Commercial Associate",
+																	"Pensioner",
+																	"State Servant",
+																	"Working"), scales::percent(round(vals/sum(vals), 2)))
+names(vals) <- val_names
+
+waffle::waffle(round(vals*100), rows = 4) +
+  scale_fill_viridis(discrete=TRUE,name=NULL)
+```
+
+
+
+```{r}
+application_train %>% 
+	na.omit() %>% 
+	group_by(TARGET) %>% 
+	summarise(n = n()/nrow(application_train %>% na.omit())) %>% 
+	ggplot(aes(y = n, fill = as.factor(TARGET), x ="")) +
+	geom_bar(stat = "identity", colour = "black") +
+	theme_void() +
+	theme(axis.text.x=element_blank()) +
+	xlab("Type of the Suite") +
+	ylab("Count of Type of the Suite in %") +
+	coord_polar("y") +
+	scale_fill_brewer(palette = "Blues", name = "") +
+	xlab("") +
+	ylab("")
+```
+

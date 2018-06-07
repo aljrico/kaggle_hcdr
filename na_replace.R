@@ -54,5 +54,25 @@ na_replace <- function(x){
 }
 
 
+na_map <- function(x){
+
+	require(tidyverse)
+	require(viridis)
+
+	x %>%
+		is.na() %>%
+		melt() %>%
+		ggplot(data = .,
+					 aes(x = Var2,
+					 		y = Var1)) +
+		geom_raster(aes(fill = value)) +
+		theme_minimal() +
+		theme(axis.text.x  = element_text(angle=45, vjust=0.5)) +
+		labs(x = "Variables in Dataset",
+				 y = "Rows / observations") +
+		scale_fill_brewer(name = "", labels = c("Present", "Missing"), type = "div", palette = 4, direction = -1)
+
+}
+
 
 
