@@ -1,13 +1,13 @@
 ---
 title: "Home Credit Default Risk"
-output:
-  rmdformats::material:
-    highlight: kate
-theme: cosmo
-highlight: haddock
-df_print: paged
-code_folding: hide
-number_sections: true
+output: 
+  html_document:
+    toc: true
+    toc_float:
+      collapsed: false
+      smooth_scroll: true
+  theme: cosmo
+  highlight: haddock
 ---
 
 ```{r global_options, include=FALSE}
@@ -32,6 +32,7 @@ library(mlr)
 library(scales)
 library(waffle)
 library(viridis)
+library(harrypotter)
 source("na_replace.R")
 ```
 
@@ -71,8 +72,9 @@ application_train <- fread("data/application_train.csv")
 
 application_train %>% 
 	ggplot(aes(x = AMT_CREDIT)) +
-	geom_histogram(fill = "deepskyblue1", colour = "black") +
-	theme_minimal()
+	geom_histogram(aes(y = ..density..), colour = "black") +
+	geom_density(fill = "yellow", alpha = 0.5) +
+	theme_bw()
 ```
 
 ### AMT_INCOME_TOTAL
@@ -82,9 +84,10 @@ application_train <- fread("data/application_train.csv")
 
 application_train %>% 
 	ggplot(aes(x = AMT_INCOME_TOTAL)) +
-	geom_histogram(fill = "deepskyblue1", colour = "black") +
+	geom_histogram(aes(fill = ..count..), colour = "black") +
 	theme_minimal() +
-	scale_y_log10()
+	scale_y_log10() +
+	scale_fill_viridis()
 ```
 
 ### AMT_GOODS_PRICE
@@ -94,7 +97,7 @@ application_train <- fread("data/application_train.csv")
 
 application_train %>% 
 	ggplot(aes(x = AMT_GOODS_PRICE)) +
-	geom_histogram(fill = "deepskyblue1", colour = "black") +
+		geom_histogram(aes(fill = ..count..), colour = "black") +
 	theme_minimal()
 ```
 
@@ -147,7 +150,7 @@ vals <- c(df["n"])[[1]]
 val_names <- sprintf("%s (%s)", c("Paid", "Did not pay"), scales::percent(round(vals/sum(vals), 2)))
 names(vals) <- val_names
 
-waffle::waffle(round(vals*100), rows = 4) +
+waffle::waffle(round(vals*100), rows = 5) +
   scale_fill_viridis(discrete=TRUE,name=NULL)
 ```
 
@@ -167,7 +170,7 @@ vals <- c(df["n"])[[1]]
 val_names <- sprintf("%s (%s)", c("Cash Loans", "Revolving Loans"), scales::percent(round(vals/sum(vals), 2)))
 names(vals) <- val_names
 
-waffle::waffle(round(vals*100), rows = 4) +
+waffle::waffle(round(vals*100), rows = 5) +
   scale_fill_viridis(discrete=TRUE,name=NULL)
 ```
 
@@ -189,7 +192,7 @@ val_names <- sprintf("%s (%s)", c("Commercial Associate",
 																	"Working"), scales::percent(round(vals/sum(vals), 2)))
 names(vals) <- val_names
 
-waffle::waffle(round(vals*100), rows = 4) +
+waffle::waffle(round(vals*100), rows = 5) +
   scale_fill_viridis(discrete=TRUE,name=NULL)
 ```
 
