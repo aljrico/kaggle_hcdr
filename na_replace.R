@@ -64,7 +64,7 @@ na_map <- function(x){
 					 		y = Var1)) +
 		geom_raster(aes(fill = value)) +
 		theme_minimal() +
-		theme(axis.text.x  = element_text(angle=45, vjust=0.5)) +
+		theme(axis.text.x  = element_text(angle=90, vjust=0.5)) +
 		labs(x = "Variables in Dataset",
 				 y = "Rows / observations") +
 		scale_fill_brewer(name = "", labels = c("Present", "Missing"), type = "div", palette = 4, direction = -1)

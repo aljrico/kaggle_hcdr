@@ -23,6 +23,12 @@ Home Credit strives to broaden financial inclusion for the unbanked population b
 
 While Home Credit is currently using various statistical and machine learning methods to make these predictions, they're challenging Kagglers to help them unlock the full potential of their data. Doing so will ensure that clients capable of repayment are not rejected and that loans are given with a principal, maturity, and repayment calendar that will empower their clients to be successful.
 
+## Data
+
+The data is provided by Home Credit, a company dedicated to offer loans to unbanked customers. 
+
+Lending money is a business of considerable risk. The main risk is, of course, what we call *Creadit Risk*. This is the probability of the burrower of being unable or unwilling to pay back the loan. Predicting whether or not a client will repay a loan or have difficulty is a critical business need, and Home Credit is hosting this competition on Kaggle to see what sort of models the machine learning community can develop to help them in this task.
+
 ```{r}
 library(tidyverse)
 library(data.table)
@@ -70,11 +76,20 @@ rm(application_train, application_test, bureau, bureau_balance, credit_card_bala
 ```{r}
 application_train <- fread("data/application_train.csv")
 
+
 application_train %>% 
-	ggplot(aes(x = AMT_CREDIT)) +
-	geom_histogram(aes(y = ..density..), colour = "black") +
-	geom_density(fill = "yellow", alpha = 0.5) +
+	ggplot(aes(x = AMT_CREDIT, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "dodge") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin") +
 	theme_bw()
+
+application_train %>% 
+	ggplot(aes(x = AMT_CREDIT, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "fill") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin") +
+	theme_bw()
+
+	
 ```
 
 ### AMT_INCOME_TOTAL
@@ -83,11 +98,20 @@ application_train %>%
 application_train <- fread("data/application_train.csv")
 
 application_train %>% 
-	ggplot(aes(x = AMT_INCOME_TOTAL)) +
-	geom_histogram(aes(fill = ..count..), colour = "black") +
+	ggplot(aes(x = AMT_INCOME_TOTAL, y = ..density..)) +
+	geom_histogram(aes(fill = as.factor(TARGET)), colour = "black", position = "dodge") +
 	theme_minimal() +
-	scale_y_log10() +
-	scale_fill_viridis()
+	scale_x_log10() +
+	xlab("log(Total Income)") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin")
+
+application_train %>% 
+	ggplot(aes(x = AMT_INCOME_TOTAL, y = ..density..)) +
+	geom_histogram(aes(fill = as.factor(TARGET)), colour = "black", position = "fill") +
+	theme_minimal() +
+	scale_x_log10() +
+	xlab("log(Total Income)") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin")
 ```
 
 ### AMT_GOODS_PRICE
@@ -97,8 +121,18 @@ application_train <- fread("data/application_train.csv")
 
 application_train %>% 
 	ggplot(aes(x = AMT_GOODS_PRICE)) +
-		geom_histogram(aes(fill = ..count..), colour = "black") +
-	theme_minimal()
+	geom_histogram(aes(fill = as.factor(TARGET), y = ..density..), colour = "black", position = "dodge") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin") +
+	scale_x_log10() +
+	theme_bw()
+
+application_train %>% 
+	ggplot(aes(x = AMT_GOODS_PRICE)) +
+	geom_histogram(aes(fill = as.factor(TARGET), y = ..density..), colour = "black", position = "fill") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin") +
+	scale_x_log10() +
+	theme_bw()
+
 ```
 
 
@@ -128,8 +162,9 @@ val_names <- sprintf("%s (%s)", c("Children",
 																	"Unaccompanied"), scales::percent(round(vals/sum(vals), 6)))
 names(vals) <- val_names
 
-waffle::waffle(round(vals*100), rows = 5) +
-  scale_fill_viridis(discrete=TRUE,name=NULL)
+waffle::waffle(round(vals*100), rows = 3, title = "Payers") +
+  scale_fill_hp(discrete = TRUE, name = NULL, house = "Ravenclaw")
+
 ```
 
 We can see that our data is extremely unbalanced.
@@ -151,7 +186,7 @@ val_names <- sprintf("%s (%s)", c("Paid", "Did not pay"), scales::percent(round(
 names(vals) <- val_names
 
 waffle::waffle(round(vals*100), rows = 5) +
-  scale_fill_viridis(discrete=TRUE,name=NULL)
+  scale_fill_hp(discrete = TRUE, name = NULL, direction = -1)
 ```
 
 ### Types of Loan
@@ -171,7 +206,7 @@ val_names <- sprintf("%s (%s)", c("Cash Loans", "Revolving Loans"), scales::perc
 names(vals) <- val_names
 
 waffle::waffle(round(vals*100), rows = 5) +
-  scale_fill_viridis(discrete=TRUE,name=NULL)
+  scale_fill_hp(discrete = TRUE, name = NULL, house = "Hufflepuff")
 ```
 
 ### Income Sources
@@ -193,25 +228,7 @@ val_names <- sprintf("%s (%s)", c("Commercial Associate",
 names(vals) <- val_names
 
 waffle::waffle(round(vals*100), rows = 5) +
-  scale_fill_viridis(discrete=TRUE,name=NULL)
+  scale_fill_hp(discrete = TRUE, name = NULL, house = "Ravenclaw")
 ```
 
-
-
-```{r}
-application_train %>% 
-	na.omit() %>% 
-	group_by(TARGET) %>% 
-	summarise(n = n()/nrow(application_train %>% na.omit())) %>% 
-	ggplot(aes(y = n, fill = as.factor(TARGET), x ="")) +
-	geom_bar(stat = "identity", colour = "black") +
-	theme_void() +
-	theme(axis.text.x=element_blank()) +
-	xlab("Type of the Suite") +
-	ylab("Count of Type of the Suite in %") +
-	coord_polar("y") +
-	scale_fill_brewer(palette = "Blues", name = "") +
-	xlab("") +
-	ylab("")
-```
 
