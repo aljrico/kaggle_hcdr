@@ -263,6 +263,32 @@ names(vals) <- val_names
 waffle::waffle(round(vals*100), rows = 3, title = "Payers") +
   scale_fill_hp(discrete = TRUE, name = NULL, house = "Ravenclaw")
 
+df <- application_train %>% 
+	na.omit() %>% 
+	mutate(NAME_TYPE_SUITE = ifelse(NAME_TYPE_SUITE == "", "Other_C", NAME_TYPE_SUITE)) %>% 
+	group_by(NAME_TYPE_SUITE, TARGET) %>% 
+	summarise(n = n()) %>% 
+	arrange(desc(n))
+
+df2 <- df %>% 
+	filter(!(NAME_TYPE_SUITE %in% c("Unaccompanied", "Family", "Spouse, partner"))) %>% 
+	group_by(TARGET) %>% 
+	summarise(n = sum(n)) %>% 
+	mutate(NAME_TYPE_SUITE = "Others")
+
+df %>% 
+	filter((NAME_TYPE_SUITE %in% c("Unaccompanied", "Family", "Spouse, partner"))) %>% 
+	bind_rows(df2) %>% 
+		ggplot(aes(x = NAME_TYPE_SUITE, y = log10(n), fill = as.factor(TARGET))) +
+	geom_col(colour = "black", position = "fill") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Normalised Distribution") +
+	ylab("Log10(Log101(")
+	scale_y_log10() +
+	theme_bw()
+	
+
+
 ```
 
 We can see that our data is extremely unbalanced.
