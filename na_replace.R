@@ -52,10 +52,6 @@ na_replace <- function(x){
 
 
 na_map <- function(x){
-
-	require(tidyverse)
-	require(viridis)
-
 	x %>%
 		is.na() %>%
 		melt() %>%
@@ -67,8 +63,7 @@ na_map <- function(x){
 		theme(axis.text.x  = element_text(angle=90, vjust=0.5)) +
 		labs(x = "Variables in Dataset",
 				 y = "Rows / observations") +
-		scale_fill_brewer(name = "", labels = c("Present", "Missing"), type = "div", palette = 4, direction = -1)
-
+		scale_fill_hp(name = "", labels = c("Present", "Missing"), house = "Hufflepuff")
 }
 
 

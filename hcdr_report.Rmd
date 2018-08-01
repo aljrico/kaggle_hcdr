@@ -3,15 +3,12 @@ title: "Home Credit Default Risk"
 output: 
   html_document:
     toc: true
-    toc_float:
-      collapsed: false
-      smooth_scroll: true
   theme: cosmo
   highlight: haddock
 ---
 
 ```{r global_options, include=FALSE}
-knitr::opts_chunk$set(fig.width=12, fig.height=8, fig.path='Figs/',
+knitr::opts_chunk$set(fig.path='Figs/',
                       echo=FALSE, warning=FALSE, message=FALSE)
 ```
 
@@ -38,8 +35,11 @@ library(mlr)
 library(scales)
 library(waffle)
 library(viridis)
+library(devtools)
+library(gridExtra)
+devtools::install_github("aljrico/harrypotter")
 library(harrypotter)
-source("na_replace.R")
+
 ```
 
 # Loading Data
@@ -49,13 +49,13 @@ Let us start taking a look at the dimensions of the data.
 > Dataset | (rows, columns)
 
 ```{r}
-application_train <- fread("data/application_train.csv")
-application_test <- fread("data/application_test.csv")
-bureau <- fread("data/bureau.csv")
-bureau_balance <- fread("data/bureau_balance.csv")
-credit_card_balance <- fread("data/credit_card_balance.csv")
+application_train <-     fread("data/application_train.csv")
+application_test <-      fread("data/application_test.csv")
+bureau <-                fread("data/bureau.csv")
+bureau_balance <-        fread("data/bureau_balance.csv")
+credit_card_balance <-   fread("data/credit_card_balance.csv")
 installments_payments <- fread("data/installments_payments.csv")
-pos_cash_balance <- fread("data/POS_CASH_balance.csv")
+pos_cash_balance <-      fread("data/POS_CASH_balance.csv")
 
 print(paste0("Application Train | ","(" ,  dim(application_train)[[1]], ",", dim(application_train)[[2]], ")"))
 print(paste0("Bureau | ","(" ,  dim(bureau)[[1]], ",", dim(bureau)[[2]], ")"))
@@ -67,9 +67,9 @@ print(paste0("POS CASH Balance | ","(" ,  dim(pos_cash_balance)[[1]], ",", dim(p
 rm(application_train, application_test, bureau, bureau_balance, credit_card_balance, installments_payments, pos_cash_balance)
 ```
 
-# Exploratory Analysis
+# Exploratory Data Analysis (EDA)
 
-## Distributions
+## AMT
 
 ### AMT_CREDIT
 
@@ -77,68 +77,166 @@ rm(application_train, application_test, bureau, bureau_balance, credit_card_bala
 application_train <- fread("data/application_train.csv")
 
 
-application_train %>% 
+plot1 <- application_train %>% 
 	ggplot(aes(x = AMT_CREDIT, fill = as.factor(TARGET))) +
 	geom_histogram(aes(y = ..density..), colour = "black", position = "dodge") +
-	scale_fill_hp(discrete = TRUE, house = "Slytherin") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Variable Distribution") +
 	theme_bw()
 
-application_train %>% 
+plot2 <- application_train %>% 
 	ggplot(aes(x = AMT_CREDIT, fill = as.factor(TARGET))) +
 	geom_histogram(aes(y = ..density..), colour = "black", position = "fill") +
-	scale_fill_hp(discrete = TRUE, house = "Slytherin") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Normalised Variable Distribution") +
 	theme_bw()
 
-	
+plot3 <- application_train$AMT_CREDIT %>% 
+	is.na() %>% 
+	mean() %>% 
+	as_tibble() %>% 
+	mutate(x = "AMT_CREDIT",
+				 y = 1 - value) %>% 
+	melt() %>% 
+	ggplot() +
+	geom_col(aes(x = as.factor(x), y = 100*value, fill = variable), width = 0.3, colour = "black") +
+	scale_fill_hp(house = "Hufflepuff", name = "", labels = c("NA", "value"), discrete = TRUE) +
+	xlab("") +
+	ylab("(%)") +
+	ggtitle("Percentage of Missing Values") +
+	theme_bw()
+
+plot1
+plot2
+plot3
+
 ```
 
 ### AMT_INCOME_TOTAL
 
 ```{r}
-application_train <- fread("data/application_train.csv")
 
-application_train %>% 
-	ggplot(aes(x = AMT_INCOME_TOTAL, y = ..density..)) +
-	geom_histogram(aes(fill = as.factor(TARGET)), colour = "black", position = "dodge") +
-	theme_minimal() +
+plot1 <- application_train %>% 
+	ggplot(aes(x = AMT_INCOME_TOTAL, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "dodge") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Variable Distribution") +
 	scale_x_log10() +
-	xlab("log(Total Income)") +
-	scale_fill_hp(discrete = TRUE, house = "Slytherin")
+	theme_bw()
 
-application_train %>% 
-	ggplot(aes(x = AMT_INCOME_TOTAL, y = ..density..)) +
-	geom_histogram(aes(fill = as.factor(TARGET)), colour = "black", position = "fill") +
-	theme_minimal() +
+plot2 <- application_train %>% 
+	ggplot(aes(x = AMT_INCOME_TOTAL, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "fill") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Normalised Variable Distribution") +
 	scale_x_log10() +
-	xlab("log(Total Income)") +
-	scale_fill_hp(discrete = TRUE, house = "Slytherin")
+	theme_bw()
+
+plot3 <- application_train$AMT_INCOME_TOTAL %>% 
+	is.na() %>% 
+	mean() %>% 
+	as_tibble() %>% 
+	mutate(x = "AMT_CREDIT",
+				 y = 1 - value) %>% 
+	melt() %>% 
+	ggplot() +
+	geom_col(aes(x = as.factor(x), y = 100*value, fill = variable), width = 0.3, colour = "black") +
+	scale_fill_hp(house = "Hufflepuff", name = "", labels = c("NA", "value"), discrete = TRUE) +
+	xlab("") +
+	ylab("(%)") +
+	ggtitle("Percentage of Missing Values") +
+	theme_bw()
+
+plot1
+plot2
+plot3
+
 ```
 
 ### AMT_GOODS_PRICE
 
 ```{r}
-application_train <- fread("data/application_train.csv")
 
-application_train %>% 
-	ggplot(aes(x = AMT_GOODS_PRICE)) +
-	geom_histogram(aes(fill = as.factor(TARGET), y = ..density..), colour = "black", position = "dodge") +
-	scale_fill_hp(discrete = TRUE, house = "Slytherin") +
+plot1 <- application_train %>% 
+	ggplot(aes(x = AMT_GOODS_PRICE, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "dodge") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Variable Distribution") +
 	scale_x_log10() +
 	theme_bw()
 
-application_train %>% 
-	ggplot(aes(x = AMT_GOODS_PRICE)) +
-	geom_histogram(aes(fill = as.factor(TARGET), y = ..density..), colour = "black", position = "fill") +
-	scale_fill_hp(discrete = TRUE, house = "Slytherin") +
+plot2 <- application_train %>% 
+	ggplot(aes(x = AMT_GOODS_PRICE, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "fill") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Normalised Variable Distribution") +
 	scale_x_log10() +
 	theme_bw()
+
+plot3 <- application_train$AMT_GOODS_PRICE %>% 
+	is.na() %>% 
+	mean() %>% 
+	as_tibble() %>% 
+	mutate(x = "AMT_CREDIT",
+				 y = 1 - value) %>% 
+	melt() %>% 
+	ggplot() +
+	geom_col(aes(x = as.factor(x), y = 100*value, fill = variable), width = 0.3, colour = "black") +
+	scale_fill_hp(house = "Hufflepuff", name = "", labels = c("NA", "value"), discrete = TRUE) +
+	xlab("") +
+	ylab("(%)") +
+	ggtitle("Percentage of Missing Values") +
+	theme_bw()
+
+plot1
+plot2
+plot3
+
+```
+
+### AMT_ANNUITY
+
+```{r}
+
+plot1 <- application_train %>% 
+	ggplot(aes(x = AMT_ANNUITY, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "dodge") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Variable Distribution") +
+	scale_x_log10() +
+	theme_bw()
+
+plot2 <- application_train %>% 
+	ggplot(aes(x = AMT_ANNUITY, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "fill") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Normalised Variable Distribution") +
+	scale_x_log10() +
+	theme_bw()
+
+plot3 <- application_train$AMT_ANNUITY %>% 
+	is.na() %>% 
+	mean() %>% 
+	as_tibble() %>% 
+	mutate(x = "AMT_CREDIT",
+				 y = 1 - value) %>% 
+	melt() %>% 
+	ggplot() +
+	geom_col(aes(x = as.factor(x), y = 100*value, fill = variable), width = 0.3, colour = "black") +
+	scale_fill_hp(house = "Hufflepuff", name = "", labels = c("NA", "value"), discrete = TRUE) +
+	xlab("") +
+	ylab("(%)") +
+	ggtitle("Percentage of Missing Values") +
+	theme_bw()
+
+plot1
+plot2
+plot3
 
 ```
 
 
-## Poportions
-
-### Who accompanied the client?
+## Who accompanied the client?
 
 In this plot we can see an unnamed category. This caregory refers to the rest of Type Suites together.
 
