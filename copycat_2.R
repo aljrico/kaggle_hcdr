@@ -11,7 +11,7 @@ library(randomForest)
 
 cat("Loading data...\n")
 
-tr               <- fread("data/application_train.csv") %>% sample_n(1e5)
+tr               <- fread("data/application_train.csv") %>% sample_n(1e4)
 te               <- fread("data/application_test.csv")
 bureau           <- fread("data/bureau.csv")
 bbalance         <- fread("data/bureau_balance.csv")
@@ -107,22 +107,29 @@ tr_te <- tr %>%
 				 INCOME_PER_PERSON = log1p(AMT_INCOME_TOTAL / CNT_FAM_MEMBERS),
 				 ANNUITY_INCOME_PERC = sqrt(AMT_ANNUITY / (1 + AMT_INCOME_TOTAL)),
 				 ANNUITY_INCOME_PERC_LOG = log10(AMT_ANNUITY / (1 + AMT_INCOME_TOTAL)),
-				 ANNUITY_PRESSURE = log10(log10(AMT_CREDT) * AMT_ANNUITY),
+				 ANNUITY_PRESSURE = log10(log10(AMT_CREDIT) * AMT_ANNUITY),
 				 LOAN_INCOME_RATIO = AMT_CREDIT / AMT_INCOME_TOTAL,
 				 LOAN_INCOME_RATIO_LOG = log10(AMT_CREDIT / AMT_INCOME_TOTAL),
 				 LOAN_INCOME_PROD = AMT_CREDIT * AMT_INCOME_TOTAL,
 				 LOAN_INCOME_PROD_LOG = log10(AMT_CREDIT * AMT_INCOME_TOTAL),
 				 ANNUITY_LENGTH = AMT_CREDIT / AMT_ANNUITY,
 				 CHILDREN_RATIO = CNT_CHILDREN / CNT_FAM_MEMBERS,
-				 AMT_GOODS_PRICE_LOG = log10(AMT_GOODS_PRICE_LOG),
-				 CREDIT_TO_GOODS_RATIO_EXTRA = log10(AMT_CREDIT / log10(AMT_GOODS_PRICE_LOG)),
+				 AMT_GOODS_PRICE_LOG = log10(AMT_GOODS_PRICE),
+				 CREDIT_TO_GOODS_RATIO_EXTRA = log10(AMT_CREDIT / log10(AMT_GOODS_PRICE)),
 				 CREDIT_TO_GOODS_RATIO = AMT_CREDIT / AMT_GOODS_PRICE,
 				 INC_PER_CHLD = AMT_INCOME_TOTAL / (1 + CNT_CHILDREN),
+				 INC_PER_CHLD_LOG = log10(AMT_INCOME_TOTAL / (1 + CNT_CHILDREN)),
+				 INCOME_RATE_PER_CHILD = log10(AMT_INCOME_TOTAL / ((AMT_CREDIT)*(1 + CNT_CHILDREN^2))),
 				 SOURCES_PROD = EXT_SOURCE_1 * EXT_SOURCE_2 * EXT_SOURCE_3,
+				 SOURCES_MEAN = ((EXT_SOURCE_1 + EXT_SOURCE_2)/2)^2,
+				 AGE_PRESSURE = log10(AMT_CREDIT*(-DAYS_BIRTH)/AMT_INCOME_TOTAL),
 				 CAR_TO_BIRTH_RATIO = OWN_CAR_AGE / DAYS_BIRTH,
 				 CAR_TO_EMPLOY_RATIO = OWN_CAR_AGE / DAYS_EMPLOYED,
+				 IMPULSIVITY = -DAYS_LAST_PHONE_CHANGE*log10(AMT_INCOME_TOTAL),
+				 IMPULSIVITY_LOG = log10(-DAYS_LAST_PHONE_CHANGE*log10(AMT_INCOME_TOTAL)),
 				 PHONE_TO_BIRTH_RATIO = DAYS_LAST_PHONE_CHANGE / DAYS_BIRTH,
-				 PHONE_TO_EMPLOY_RATIO = DAYS_LAST_PHONE_CHANGE / DAYS_EMPLOYED)
+				 PHONE_TO_EMPLOY_RATIO = DAYS_LAST_PHONE_CHANGE / DAYS_EMPLOYED,
+				 PHONE_TO_EMPLOY_RATIO_LOG = log10(DAYS_LAST_PHONE_CHANGE / DAYS_EMPLOYED))
 
 docs <- str_subset(names(tr), "FLAG_DOC")
 live <- str_subset(names(tr), "(?!NFLAG_)(?!FLAG_DOC)(?!_FLAG_)FLAG_")
@@ -150,43 +157,43 @@ tr_te %<>%
 
 
 # Random Forest -----------------------------------------------------------
-
-test_df <- tr_te[-tri, ]
-train_df <- tr_te
-train_df[is.na(train_df)] <- 0
-test_df[is.na(test_df)] <- 0
-rf_model <- randomForest(y = as.factor(y[tri]), x = train_df[tri,] , importance = TRUE)
-
-
-# Show model error
-plot(rf_model, ylim=c(0,0.36))
-legend('topright', colnames(rf_model$err.rate), col=1:3, fill=1:3)
-
-
-# Get importance
-importance    <- importance(rf_model)
-varImportance <- data.frame(Variables = row.names(importance),
-														Importance = round(importance[ ,'MeanDecreaseGini'],2))
-
-
-# Use ggplot2 to visualize the relative importance of variables
-varImportance %>%
-	dplyr::select(Variables, Importance) %>%
-	dplyr::arrange(desc(Importance)) %>%
-	dplyr::top_n(50) %>%
-	ggplot(aes(x = reorder(Variables, Importance),
-						 y = Importance,
-						 fill = Importance)) +
-	geom_bar(stat='identity') +
-	labs(x = 'Variables') +
-	coord_flip() +
-	theme_bw()
-
-read_csv("data/sample_submission.csv") %>%
-	mutate(SK_ID_CURR = as.integer(SK_ID_CURR),
-				 TARGET = predict(rf_model, test_df)) %>%
-	write_csv(paste0("submit/rf_model", ".csv"))
-
+#
+# test_df <- tr_te[-tri, ]
+# train_df <- tr_te
+# train_df[is.na(train_df)] <- 0
+# test_df[is.na(test_df)] <- 0
+# rf_model <- randomForest(y = as.factor(y[tri]), x = train_df[tri,] , importance = TRUE)
+#
+#
+# # Show model error
+# plot(rf_model, ylim=c(0,0.36))
+# legend('topright', colnames(rf_model$err.rate), col=1:3, fill=1:3)
+#
+#
+# # Get importance
+# importance    <- importance(rf_model)
+# varImportance <- data.frame(Variables = row.names(importance),
+# 														Importance = round(importance[ ,'MeanDecreaseGini'],2))
+#
+#
+# # Use ggplot2 to visualize the relative importance of variables
+# varImportance %>%
+# 	dplyr::select(Variables, Importance) %>%
+# 	dplyr::arrange(desc(Importance)) %>%
+# 	dplyr::top_n(50) %>%
+# 	ggplot(aes(x = reorder(Variables, Importance),
+# 						 y = Importance,
+# 						 fill = Importance)) +
+# 	geom_bar(stat='identity') +
+# 	labs(x = 'Variables') +
+# 	coord_flip() +
+# 	theme_bw()
+#
+# read_csv("data/sample_submission.csv") %>%
+# 	mutate(SK_ID_CURR = as.integer(SK_ID_CURR),
+# 				 TARGET = predict(rf_model, test_df)) %>%
+# 	write_csv(paste0("submit/rf_model", ".csv"))
+#
 
 
 # XGB ---------------------------------------------------------------------
