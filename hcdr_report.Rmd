@@ -140,7 +140,7 @@ plot3 <- application_train$AMT_CREDIT %>%
 
 plot1
 plot2
-plot3
+
 
 ```
 
@@ -181,7 +181,7 @@ plot3 <- application_train$AMT_INCOME_TOTAL %>%
 
 plot1
 plot2
-plot3
+
 
 ```
 ### LOAN_INCOME_RATIO
@@ -216,8 +216,8 @@ plot2
 ```{r}
 
 plot1 <- application_train %>%
-	mutate(LOAN_INCOME_RATIO = AMT_CREDIT * AMT_INCOME_TOTAL) %>% 
-	ggplot(aes(x = LOAN_INCOME_RATIO, fill = as.factor(TARGET))) +
+	mutate(LOAN_INCOME_PROD = AMT_CREDIT * AMT_INCOME_TOTAL) %>% 
+	ggplot(aes(x = LOAN_INCOME_PROD, fill = as.factor(TARGET))) +
 	geom_histogram(aes(y = ..density..), colour = "black", position = "dodge") +
 	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
 	ggtitle("Variable Distribution") +
@@ -225,8 +225,8 @@ plot1 <- application_train %>%
 	theme_bw()
 
 plot2 <- application_train %>% 
-	mutate(LOAN_INCOME_RATIO = AMT_CREDIT * AMT_INCOME_TOTAL) %>% 
-	ggplot(aes(x = (LOAN_INCOME_RATIO), fill = as.factor(TARGET))) +
+	mutate(LOAN_INCOME_PROD= AMT_CREDIT * AMT_INCOME_TOTAL) %>% 
+	ggplot(aes(x = (LOAN_INCOME_PROD), fill = as.factor(TARGET))) +
 	geom_histogram(aes(y = ..density..), colour = "black", position = "fill") +
 	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
 	ggtitle("Normalised Variable Distribution") +
@@ -259,21 +259,6 @@ plot2 <- application_train %>%
 	scale_x_log10() +
 	theme_bw()
 
-plot3 <- application_train$AMT_GOODS_PRICE %>% 
-	is.na() %>% 
-	mean() %>% 
-	as_tibble() %>% 
-	mutate(x = "AMT_CREDIT",
-				 y = 1 - value) %>% 
-	melt() %>% 
-	ggplot() +
-	geom_col(aes(x = as.factor(x), y = 100*value, fill = variable), width = 0.3, colour = "black") +
-	scale_fill_hp(house = "Hufflepuff", name = "", labels = c("NA", "value"), discrete = TRUE) +
-	xlab("") +
-	ylab("(%)") +
-	ggtitle("Percentage of Missing Values") +
-	theme_bw()
-
 plot1
 plot2
 
@@ -283,19 +268,19 @@ plot2
 ```{r}
 
 plot1 <- application_train %>% 
-	ggplot(aes(x = AMT_CREDIT / AMT_GOODS_PRICE, fill = as.factor(TARGET))) +
+	ggplot(aes(x = AMT_CREDIT / log10(AMT_GOODS_PRICE), fill = as.factor(TARGET))) +
 	geom_histogram(aes(y = ..density..), colour = "black", position = "dodge") +
 	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
 	ggtitle("Variable Distribution") +
-	# scale_x_log10() +
+	scale_x_log10() +
 	theme_bw()
 
 plot2 <- application_train %>% 
-	ggplot(aes(x = AMT_CREDIT / AMT_GOODS_PRICE, fill = as.factor(TARGET))) +
+	ggplot(aes(x = (AMT_CREDIT / log10(AMT_GOODS_PRICE)), fill = as.factor(TARGET))) +
 	geom_histogram(aes(y = ..density..), colour = "black", position = "fill") +
 	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
 	ggtitle("Normalised Variable Distribution") +
-	# scale_x_log10() +
+	scale_x_log10() +
 	theme_bw()
 
 plot1
@@ -324,24 +309,35 @@ plot2 <- application_train %>%
 	scale_x_log10() +
 	theme_bw()
 
-plot3 <- application_train$AMT_ANNUITY %>% 
-	is.na() %>% 
-	mean() %>% 
-	as_tibble() %>% 
-	mutate(x = "AMT_CREDIT",
-				 y = 1 - value) %>% 
-	melt() %>% 
-	ggplot() +
-	geom_col(aes(x = as.factor(x), y = 100*value, fill = variable), width = 0.3, colour = "black") +
-	scale_fill_hp(house = "Hufflepuff", name = "", labels = c("NA", "value"), discrete = TRUE) +
-	xlab("") +
-	ylab("(%)") +
-	ggtitle("Percentage of Missing Values") +
+plot1
+plot2
+
+
+```
+
+### ANNUITY_PRESSURE
+
+```{r}
+
+plot1 <- application_train %>% 
+	ggplot(aes(x = log10(AMT_CREDIT) * AMT_ANNUITY, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "dodge") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Variable Distribution") +
+	scale_x_log10() +
+	theme_bw()
+
+plot2 <- application_train %>% 
+	ggplot(aes(x = log10(AMT_CREDIT) * (AMT_ANNUITY), fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "fill") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Normalised Variable Distribution") +
+	scale_x_log10() +
 	theme_bw()
 
 plot1
 plot2
-plot3
+
 
 ```
 
