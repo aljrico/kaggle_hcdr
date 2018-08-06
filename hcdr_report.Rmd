@@ -342,6 +342,443 @@ plot2
 ```
 
 
+### CNT_CHILDREN
+
+```{r}
+
+plot1 <- application_train %>% 
+	ggplot(aes(x = CNT_CHILDREN, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "dodge") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Variable Distribution") +
+	theme_bw()
+
+plot2 <- application_train %>% 
+	ggplot(aes(x = CNT_CHILDREN, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "fill") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Normalised Variable Distribution") +
+	theme_bw()
+
+plot1
+plot2
+```
+```{r}
+
+plot1 <- application_train %>% 
+	mutate(HAS_CHILDREN = CNT_CHILDREN > 0) %>% 
+	group_by(HAS_CHILDREN, TARGET) %>% 
+	summarise(n = n()) %>% 
+	group_by(HAS_CHILDREN) %>% 
+	mutate(prop = n/sum(n)) %>% 
+	ggplot(aes(x = HAS_CHILDREN, fill = as.factor(TARGET))) +
+	geom_col(aes(y = prop), colour = "black") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Variable Distribution") +
+	ylab("Proportion") +
+	theme_bw()
+
+plot1
+```
+
+
+### INC_PER_CHILD
+```{r}
+
+plot1 <- application_train %>% 
+	ggplot(aes(x = AMT_INCOME_TOTAL / (1 + CNT_CHILDREN), fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "dodge") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Variable Distribution") +
+	scale_x_log10() +
+	theme_bw()
+
+plot2 <- application_train %>% 
+	ggplot(aes(x = AMT_INCOME_TOTAL / (1 + CNT_CHILDREN), fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "fill") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Normalised Variable Distribution") +
+	scale_x_log10() +
+	theme_bw()
+
+plot1
+plot2
+```
+
+### INCOME_RATE_PER_CHILD
+```{r}
+
+plot1 <- application_train %>% 
+	ggplot(aes(x = AMT_INCOME_TOTAL / ((AMT_CREDIT)*(1 + CNT_CHILDREN^2)), fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "dodge") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Variable Distribution") +
+	scale_x_log10() +
+	theme_bw()
+
+plot2 <- application_train %>% 
+	ggplot(aes(x = AMT_INCOME_TOTAL / ((AMT_CREDIT)*(1 + CNT_CHILDREN^2)), fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "fill") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Normalised Variable Distribution") +
+	scale_x_log10() +
+	theme_bw()
+
+plot1
+plot2
+```
+### DAYS_EMPLOYED
+```{r}
+plot1 <- application_train %>% 
+	ggplot(aes(x = DAYS_EMPLOYED, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "dodge") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Variable Distribution") +
+	theme_bw()
+
+plot2 <- application_train %>% 
+	ggplot(aes(x = DAYS_EMPLOYED, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "fill") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Normalised Variable Distribution") +
+	theme_bw()
+
+plot1
+plot2
+```
+
+Wtf is this? Useless values, useless feature.
+
+
+### DAYS_BIRTH
+```{r}
+plot1 <- application_train %>% 
+	ggplot(aes(x = -DAYS_BIRTH/365.25, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "dodge") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Variable Distribution") +
+	xlab("Age") +
+	theme_bw()
+
+plot2 <- application_train %>% 
+	ggplot(aes(x = -DAYS_BIRTH/365.25, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "fill") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Normalised Variable Distribution") +
+	xlab("Age") +
+	theme_bw()
+
+plot1
+plot2
+```
+
+### AGE_PRESSURE
+```{r}
+plot1 <- application_train %>% 
+	ggplot(aes(x = (AMT_CREDIT*(-DAYS_BIRTH)/AMT_INCOME_TOTAL), fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "dodge") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Variable Distribution") +
+	scale_x_log10() +
+	theme_bw()
+
+plot2 <- application_train %>% 
+	ggplot(aes(x = (AMT_CREDIT*(-DAYS_BIRTH)/AMT_INCOME_TOTAL), fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "fill") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Normalised Variable Distribution") +
+	scale_x_log10() +
+	theme_bw()
+
+plot1
+plot2
+```
+
+### DAYS_LAST_PHONE_CHANGE
+```{r}
+plot1 <- application_train %>% 
+	ggplot(aes(x = -DAYS_LAST_PHONE_CHANGE, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "dodge") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Variable Distribution") +
+	scale_x_log10() +
+	theme_bw()
+
+plot2 <- application_train %>% 
+	ggplot(aes(x = -DAYS_LAST_PHONE_CHANGE, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "fill") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Normalised Variable Distribution") +
+	scale_x_log10() +
+	theme_bw()
+
+plot1
+plot2
+```
+### IMPULSIVITY
+```{r}
+plot1 <- application_train %>% 
+	ggplot(aes(x = -DAYS_LAST_PHONE_CHANGE*log10(AMT_INCOME_TOTAL), fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "dodge") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Variable Distribution") +
+	scale_x_log10() +
+	theme_bw()
+
+plot2 <- application_train %>% 
+	ggplot(aes(x = -DAYS_LAST_PHONE_CHANGE*log10(AMT_INCOME_TOTAL), fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "fill") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Normalised Variable Distribution") +
+	scale_x_log10() +
+	theme_bw()
+
+plot1
+plot2
+```
+
+### OWN_CAR_AGE
+```{r}
+plot1 <- application_train %>% 
+	ggplot(aes(x = OWN_CAR_AGE, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "dodge") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Variable Distribution") +
+	# scale_x_log10() +
+	theme_bw()
+
+plot2 <- application_train %>% 
+	ggplot(aes(x = OWN_CAR_AGE, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "fill") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Normalised Variable Distribution") +
+	# scale_x_log10() +
+	theme_bw()
+
+plot1
+plot2
+```
+
+
+### IMPULSIVITY_CAR
+
+```{r}
+plot1 <- application_train %>% 
+	ggplot(aes(x = 365.25*OWN_CAR_AGE*(-DAYS_LAST_PHONE_CHANGE)/AMT_INCOME_TOTAL, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "dodge") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Variable Distribution") +
+	scale_x_log10() +
+	theme_bw()
+
+plot2 <- application_train %>% 
+	ggplot(aes(x = 365.25*OWN_CAR_AGE*(-DAYS_LAST_PHONE_CHANGE)/AMT_INCOME_TOTAL, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "fill") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Normalised Variable Distribution") +
+	scale_x_log10() +
+	theme_bw()
+
+plot1
+plot2
+```
+
+### PHONE_TO_BIRTH_RATIO
+
+```{r}
+plot1 <- application_train %>% 
+	ggplot(aes(x = DAYS_LAST_PHONE_CHANGE / DAYS_BIRTH, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "dodge") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Variable Distribution") +
+	scale_x_log10() +
+	theme_bw()
+
+plot2 <- application_train %>% 
+	ggplot(aes(x = DAYS_LAST_PHONE_CHANGE / DAYS_BIRTH, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "fill") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Normalised Variable Distribution") +
+	scale_x_log10() +
+	theme_bw()
+
+plot1
+plot2
+```
+
+### PHONE_TO_EMPLOY_RATIO
+
+```{r}
+plot1 <- application_train %>% 
+	ggplot(aes(x = DAYS_LAST_PHONE_CHANGE / DAYS_EMPLOYED, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "dodge") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Variable Distribution") +
+	scale_x_log10() +
+	theme_bw()
+
+plot2 <- application_train %>% 
+	ggplot(aes(x = DAYS_LAST_PHONE_CHANGE / DAYS_EMPLOYED, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "fill") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Normalised Variable Distribution") +
+	scale_x_log10() +
+	theme_bw()
+
+plot1
+plot2
+```
+
+
+## External Sources
+
+### EXT_SOURCE_1 
+```{r}
+
+plot1 <- application_train %>% 
+	ggplot(aes(x = EXT_SOURCE_1, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "dodge") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Variable Distribution") +
+	# scale_x_log10() +
+	theme_bw()
+
+plot2 <- application_train %>% 
+	ggplot(aes(x = EXT_SOURCE_1, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "fill") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Normalised Variable Distribution") +
+	# scale_x_log10() +
+	theme_bw()
+
+plot1
+plot2
+```
+
+### EXT_SOURCE_2
+```{r}
+
+plot1 <- application_train %>% 
+	ggplot(aes(x = EXT_SOURCE_2, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "dodge") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Variable Distribution") +
+	# scale_x_log10() +
+	theme_bw()
+
+plot2 <- application_train %>% 
+	ggplot(aes(x = EXT_SOURCE_2, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "fill") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Normalised Variable Distribution") +
+	# scale_x_log10() +
+	theme_bw()
+
+plot1
+plot2
+```
+
+### EXT_SOURCE_3
+```{r}
+
+plot1 <- application_train %>% 
+	mutate(EXT_SOURCE_3 = ifelse(EXT_SOURCE_3^2 > 0.75, EXT_SOURCE_1, EXT_SOURCE_3)) %>% 
+	ggplot(aes(x = EXT_SOURCE_3, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "dodge") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Variable Distribution") +
+	# scale_x_log10() +
+	theme_bw()
+
+plot2 <- application_train %>% 
+	mutate(EXT_SOURCE_3 = ifelse(EXT_SOURCE_3^2 > 0.75, EXT_SOURCE_1, EXT_SOURCE_3)) %>% 
+	ggplot(aes(x = EXT_SOURCE_3^2, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "fill") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Normalised Variable Distribution") +
+	# scale_x_log10() +
+	theme_bw()
+
+plot1
+plot2
+```
+
+### EXT_SOURCE_OPS
+```{r}
+
+plot1 <- application_train %>% 
+	ggplot(aes(x = (abs(EXT_SOURCE_1-EXT_SOURCE_3)), fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "dodge") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Variable Distribution") +
+	theme_bw()
+
+plot2 <- application_train %>% 
+	# mutate(EXT_SOURCE_3 = ifelse(EXT_SOURCE_3^1 > 0.75, EXT_SOURCE_1, EXT_SOURCE_3)) %>% 
+	ggplot(aes(x = (abs(EXT_SOURCE_1-EXT_SOURCE_3)), fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "fill", binwidth = 0.01) +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Normalised Variable Distribution") +
+	theme_bw()
+
+plot1
+plot2
+```
+
+### EXT_SOURCE_PROD
+```{r}
+
+plot1 <- application_train %>% 
+	ggplot(aes(x = EXT_SOURCE_1*EXT_SOURCE_2, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "dodge") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Variable Distribution") +
+	theme_bw()
+
+plot2 <- application_train %>% 
+	ggplot(aes(x = EXT_SOURCE_1*EXT_SOURCE_2, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "fill", binwidth = 0.01) +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Normalised Variable Distribution") +
+	theme_bw()
+
+plot1
+plot2
+```
+
+
+### EXT_SOURCE_MEAN
+```{r}
+
+plot1 <- application_train %>% 
+	mutate(EXT_SOURCE_3 = ifelse(EXT_SOURCE_3^2 > 0.75, EXT_SOURCE_1, EXT_SOURCE_3)) %>% 
+	ggplot(aes(x = (EXT_SOURCE_1 + EXT_SOURCE_2 + EXT_SOURCE_3)/3, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "dodge") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Variable Distribution") +
+	theme_bw()
+
+plot2 <- application_train %>% 
+	mutate(EXT_SOURCE_3 = ifelse(EXT_SOURCE_3^2 > 0.75, EXT_SOURCE_1, EXT_SOURCE_3)) %>% 
+	ggplot(aes(x = (EXT_SOURCE_1 + EXT_SOURCE_2 + EXT_SOURCE_3)/3, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "fill") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Normalised Variable Distribution") +
+	theme_bw()
+
+plot3 <- application_train %>% 
+	ggplot(aes(x = ((EXT_SOURCE_1 + EXT_SOURCE_2)/2)^2, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "fill") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Normalised Variable Distribution") +
+	theme_bw()
+
+plot1
+plot2
+plot3
+```
+
+
 ## Who accompanied the client?
 
 In this plot we can see an unnamed category. This caregory refers to the rest of Type Suites together.
