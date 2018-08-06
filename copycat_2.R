@@ -5,7 +5,6 @@ library(magrittr)
 library(moments)
 library(harrypotter)
 library(randomForest)
-set.seed(666)
 
 
 # Retrieving Data ------------------------------------------------------------
@@ -44,6 +43,7 @@ rm(bureau, sum_bbalance); gc()
 
 sum_cc_balance <- cc_balance %>%
 	select(-SK_ID_PREV) %>%
+	mutate(AMT_LIMIT_EDGE = AMT_DRAWINGS_CURRENT/AMT_CREDIT_LIMIT_ACTUAL) %>%
 	mutate_if(is.character, funs(factor(.) %>% as.integer)) %>%
 	group_by(SK_ID_CURR) %>%
 	summarise_all(fn) %>%
@@ -106,7 +106,11 @@ tr_te <- tr %>%
 				 INCOME_CREDIT_PERC = AMT_INCOME_TOTAL / AMT_CREDIT,
 				 INCOME_PER_PERSON = log1p(AMT_INCOME_TOTAL / CNT_FAM_MEMBERS),
 				 ANNUITY_INCOME_PERC = sqrt(AMT_ANNUITY / (1 + AMT_INCOME_TOTAL)),
+				 ANNUITY_INCOME_PERC_LOG = log10(AMT_ANNUITY / (1 + AMT_INCOME_TOTAL)),
 				 LOAN_INCOME_RATIO = AMT_CREDIT / AMT_INCOME_TOTAL,
+				 LOAN_INCOME_RATIO_LOG = log10(AMT_CREDIT / AMT_INCOME_TOTAL),
+				 LOAN_INCOME_PROD = AMT_CREDIT * AMT_INCOME_TOTAL,
+				 LOAN_INCOME_PROD_LOG = log10(AMT_CREDIT * AMT_INCOME_TOTAL),
 				 ANNUITY_LENGTH = AMT_CREDIT / AMT_ANNUITY,
 				 CHILDREN_RATIO = CNT_CHILDREN / CNT_FAM_MEMBERS,
 				 CREDIT_TO_GOODS_RATIO = AMT_CREDIT / AMT_GOODS_PRICE,

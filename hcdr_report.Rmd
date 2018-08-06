@@ -42,7 +42,7 @@ library(harrypotter)
 
 ```
 
-# Loading Data
+# Retrieving Data
 
 Let us start taking a look at the dimensions of the data.
 
@@ -63,6 +63,38 @@ print(paste0("Bureau Balance | ","(" ,  dim(bureau_balance)[[1]], ",", dim(burea
 print(paste0("Credit Card Balance | ","(" ,  dim(credit_card_balance)[[1]], ",", dim(credit_card_balance)[[2]], ")"))
 print(paste0("Installments Payments | ","(" ,  dim(installments_payments)[[1]], ",", dim(installments_payments)[[2]], ")"))
 print(paste0("POS CASH Balance | ","(" ,  dim(pos_cash_balance)[[1]], ",", dim(pos_cash_balance)[[2]], ")"))
+
+l <- list(application_train,
+					application_test,
+					bureau,
+					bureau_balance,
+					credit_card_balance,
+					installments_payments,
+					pos_cash_balance)
+
+f <- function(x) prod(dim(x))
+
+names <- c("Train",
+					"Test",
+					"Bureau",
+					"Bureau Balance",
+					"Credit Card Balance",
+					"Installment Payments",
+					"POS Cash Balance")
+dims <- sapply(l, f) %>% as.numeric()
+
+cbind(names, dims) %>% 
+	as_tibble() %>% 
+	ggplot(aes(x = reorder(as.factor(names), -as.numeric(dims)), 
+						 y = as.numeric(dims),
+						 fill = as.numeric(dims))) +
+	geom_col(colour = "black") +
+	xlab("") +
+	ylab("Dimension (Rows * Columns)") +
+	theme_bw() +
+	theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+	theme(legend.position = "none") +
+	scale_fill_hp(house = "Gryffindor", direction = -1) 
 
 rm(application_train, application_test, bureau, bureau_balance, credit_card_balance, installments_payments, pos_cash_balance)
 ```
@@ -152,6 +184,60 @@ plot2
 plot3
 
 ```
+### LOAN_INCOME_RATIO
+
+```{r}
+
+plot1 <- application_train %>%
+	mutate(LOAN_INCOME_RATIO = AMT_CREDIT / AMT_INCOME_TOTAL) %>% 
+	ggplot(aes(x = LOAN_INCOME_RATIO, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "dodge") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Variable Distribution") +
+	scale_x_log10() +
+	theme_bw()
+
+plot2 <- application_train %>% 
+	mutate(LOAN_INCOME_RATIO = AMT_CREDIT / AMT_INCOME_TOTAL) %>% 
+	ggplot(aes(x = (LOAN_INCOME_RATIO), fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "fill") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Normalised Variable Distribution") +
+	scale_x_log10() +
+	theme_bw()
+
+plot1
+plot2
+
+```
+
+### LOAN_INCOME_PROD
+
+```{r}
+
+plot1 <- application_train %>%
+	mutate(LOAN_INCOME_RATIO = AMT_CREDIT * AMT_INCOME_TOTAL) %>% 
+	ggplot(aes(x = LOAN_INCOME_RATIO, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "dodge") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Variable Distribution") +
+	scale_x_log10() +
+	theme_bw()
+
+plot2 <- application_train %>% 
+	mutate(LOAN_INCOME_RATIO = AMT_CREDIT * AMT_INCOME_TOTAL) %>% 
+	ggplot(aes(x = (LOAN_INCOME_RATIO), fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "fill") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Normalised Variable Distribution") +
+	scale_x_log10() +
+	theme_bw()
+
+plot1
+plot2
+
+```
+
 
 ### AMT_GOODS_PRICE
 
@@ -190,9 +276,33 @@ plot3 <- application_train$AMT_GOODS_PRICE %>%
 
 plot1
 plot2
-plot3
 
 ```
+### CREDIT_TO_GOODS_RATIO
+
+```{r}
+
+plot1 <- application_train %>% 
+	ggplot(aes(x = AMT_CREDIT / AMT_GOODS_PRICE, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "dodge") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Variable Distribution") +
+	# scale_x_log10() +
+	theme_bw()
+
+plot2 <- application_train %>% 
+	ggplot(aes(x = AMT_CREDIT / AMT_GOODS_PRICE, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "fill") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Normalised Variable Distribution") +
+	# scale_x_log10() +
+	theme_bw()
+
+plot1
+plot2
+
+```
+
 
 ### AMT_ANNUITY
 
@@ -279,41 +389,17 @@ df2 <- df %>%
 df %>% 
 	filter((NAME_TYPE_SUITE %in% c("Unaccompanied", "Family", "Spouse, partner"))) %>% 
 	bind_rows(df2) %>% 
-		ggplot(aes(x = NAME_TYPE_SUITE, y = log10(n), fill = as.factor(TARGET))) +
+		ggplot(aes(x = NAME_TYPE_SUITE, y = log10(log10(n)), fill = as.factor(TARGET))) +
 	geom_col(colour = "black", position = "fill") +
 	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
 	ggtitle("Normalised Distribution") +
-	ylab("Log10(Log101(")
-	scale_y_log10() +
+	ylab("Log10(Log10(count)") +
 	theme_bw()
 	
 
 
 ```
-
-We can see that our data is extremely unbalanced.
-
-
-
-### How many people actually paid back the loan?
-
-```{r}
-application_train <- fread("data/application_train.csv")
-	
-df <- application_train %>% 
-	na.omit() %>% 
-	group_by(TARGET) %>% 
-	summarise(n = n()/nrow(application_train %>% na.omit())) 
-
-vals <- c(df["n"])[[1]]
-val_names <- sprintf("%s (%s)", c("Paid", "Did not pay"), scales::percent(round(vals/sum(vals), 2)))
-names(vals) <- val_names
-
-waffle::waffle(round(vals*100), rows = 5) +
-  scale_fill_hp(discrete = TRUE, name = NULL, direction = -1)
-```
-
-### Types of Loan
+## Types of Loan
 
 - **Rovolving loans** : Arrangement which allows for the loan amount to be withdrawn, repaid, and redrawn again in any manner and any number of times, until the arrangement expires. Credit card loans and overdrafts are revolving loans. Also called evergreen loan
 
@@ -331,6 +417,35 @@ names(vals) <- val_names
 
 waffle::waffle(round(vals*100), rows = 5) +
   scale_fill_hp(discrete = TRUE, name = NULL, house = "Hufflepuff")
+
+application_train %>% 
+	na.omit() %>% 
+	group_by(NAME_CONTRACT_TYPE, TARGET) %>% 
+	summarise(n = n()) %>% 
+	arrange(desc(n)) %>% 
+	ggplot(aes(x = NAME_CONTRACT_TYPE, y = log10(n), fill = as.factor(TARGET))) +
+	geom_col(colour = "black", position = "fill") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Normalised Distribution") +
+	theme_bw()
+```
+
+
+
+## Unbalanced Data: How many people actually paid back the loan?
+
+```{r}
+df <- application_train %>% 
+	na.omit() %>% 
+	group_by(TARGET) %>% 
+	summarise(n = n()/nrow(application_train %>% na.omit())) 
+
+vals <- c(df["n"])[[1]]
+val_names <- sprintf("%s (%s)", c("Paid", "Did not pay"), scales::percent(round(vals/sum(vals), 2)))
+names(vals) <- val_names
+
+waffle::waffle(round(vals*100), rows = 5) +
+  scale_fill_hp(discrete = TRUE, name = NULL, direction = -1)
 ```
 
 ### Income Sources
