@@ -72,8 +72,6 @@ l <- list(application_train,
 					installments_payments,
 					pos_cash_balance)
 
-f <- function(x) prod(dim(x))
-
 names <- c("Train",
 					"Test",
 					"Bureau",
@@ -81,7 +79,15 @@ names <- c("Train",
 					"Credit Card Balance",
 					"Installment Payments",
 					"POS Cash Balance")
+
+
+
+f 	     <- function(x) prod(dim(x))
+count_na <- function(x) sum(is.na(x))/(sum(is.na(x)) + sum(!is.na(x)))
+
 dims <- sapply(l, f) %>% as.numeric()
+nas  <- sapply(l,count_na) %>% as.numeric()
+
 
 cbind(names, dims) %>% 
 	as_tibble() %>% 
@@ -96,19 +102,338 @@ cbind(names, dims) %>%
 	theme(legend.position = "none") +
 	scale_fill_hp(house = "Gryffindor", direction = -1) 
 
+cbind(names,nas) %>% 
+		as_tibble() %>% 
+	ggplot(aes(x = reorder(as.factor(names), -as.numeric(nas)), 
+						 y = 100*as.numeric(nas),
+						 fill = as.numeric(nas))) +
+	geom_col(colour = "black") +
+	xlab("") +
+	ylab("% of Missing Values") +
+	theme_bw() +
+	theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+	theme(legend.position = "none") +
+	scale_fill_hp(house = "Hufflepuff", direction = 1) 
+
 rm(application_train, application_test, bureau, bureau_balance, credit_card_balance, installments_payments, pos_cash_balance)
 ```
 
 # Exploratory Data Analysis (EDA)
 
-## AMT
+## Train
+
+### Missing Values
+
+```{r}
+application_train <- fread("data/application_train.csv")
+df <- colMeans(is.na(application_train)) %>% 
+	as.data.frame()
+
+df$columns <- df %>% row.names()
+df$na_prop <- df$.
+
+df %>% 
+	as_tibble() %>% 
+	select(-.) %>% 
+	top_n(25) %>% 
+		ggplot(aes(x = reorder(as.factor(columns), as.numeric(na_prop)), 
+						 y = 100*as.numeric(na_prop),
+						 fill = as.numeric(na_prop)^2)) +
+	geom_col(colour = "grey") +
+	xlab("") +
+	ylab("% of Missing Values") +
+	theme_bw() +
+	# theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+	theme(legend.position = "none") +
+	scale_fill_hp(house = "Ravenclaw", direction = -1) +
+	coord_flip()
+	
+```
+
+### COMMONAREA_MODE
+
+```{r}
+plot1 <- application_train %>% 
+	ggplot(aes(x = COMMONAREA_MODE, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "dodge") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Variable Distribution") +
+	scale_x_log10() +
+	theme_bw()
+
+plot2 <- application_train %>% 
+	ggplot(aes(x = COMMONAREA_MODE, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "fill") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Normalised Variable Distribution") +
+	scale_x_log10() +
+	theme_bw()
+
+plot1
+plot2
+```
+
+### COMMONAREA_MEDI
+
+```{r}
+plot1 <- application_train %>% 
+	ggplot(aes(x = COMMONAREA_MEDI, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "dodge") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Variable Distribution") +
+	scale_x_log10() +
+	theme_bw()
+
+plot2 <- application_train %>% 
+	ggplot(aes(x = COMMONAREA_MEDI, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "fill") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Normalised Variable Distribution") +
+	scale_x_log10() +
+	theme_bw()
+
+plot1
+plot2
+```
+
+### COMMONAREA_MODE
+
+```{r}
+plot1 <- application_train %>% 
+	ggplot(aes(x = COMMONAREA_MODE, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "dodge") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Variable Distribution") +
+	scale_x_log10() +
+	theme_bw()
+
+plot2 <- application_train %>% 
+	ggplot(aes(x = COMMONAREA_MODE, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "fill") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Normalised Variable Distribution") +
+	scale_x_log10() +
+	theme_bw()
+
+plot1
+plot2
+```
+
+### COMMONAREA_AGG
+
+```{r}
+plot1 <- application_train %>% 
+	mutate(COMMONAREA_AGG = (COMMONAREA_AVG + COMMONAREA_MEDI + COMMONAREA_MODE)/3) %>% 
+	ggplot(aes(x = COMMONAREA_AGG, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "dodge") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Variable Distribution") +
+	scale_x_log10() +
+	theme_bw()
+
+plot2 <- application_train %>% 
+	mutate(COMMONAREA_AGG = (COMMONAREA_AVG + COMMONAREA_MEDI + COMMONAREA_MODE)/3) %>% 
+	ggplot(aes(x = COMMONAREA_AGG, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "fill") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Normalised Variable Distribution") +
+	scale_x_log10() +
+	theme_bw()
+
+plot1
+plot2
+```
+
+
+### NONLIVINGAPARTMENTS_MODE
+
+```{r}
+plot1 <- application_train %>% 
+	ggplot(aes(x = sqrt(NONLIVINGAPARTMENTS_MODE), fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "dodge") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Variable Distribution") +
+	theme_bw()
+
+plot2 <- application_train %>% 
+	ggplot(aes(x = sqrt(NONLIVINGAPARTMENTS_MODE), fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "fill") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Normalised Variable Distribution") +
+	theme_bw()
+
+plot1
+plot2
+```
+
+### NONLIVINGAPARTMENTS_MEDI
+
+```{r}
+plot1 <- application_train %>% 
+	ggplot(aes(x = sqrt(NONLIVINGAPARTMENTS_MEDI), fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "dodge") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Variable Distribution") +
+	theme_bw()
+
+plot2 <- application_train %>% 
+	ggplot(aes(x = sqrt(NONLIVINGAPARTMENTS_MEDI), fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "fill") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Normalised Variable Distribution") +
+	theme_bw()
+
+plot1
+plot2
+```
+
+### NONLIVINGAPARTMENTS_AVG
+
+```{r}
+plot1 <- application_train %>% 
+	ggplot(aes(x = sqrt(NONLIVINGAPARTMENTS_AVG), fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "dodge") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Variable Distribution") +
+	theme_bw()
+
+plot2 <- application_train %>% 
+	ggplot(aes(x = sqrt(NONLIVINGAPARTMENTS_AVG), fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "fill") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Normalised Variable Distribution") +
+	theme_bw()
+
+plot1
+plot2
+```
+
+### NONLIVINGAPARTMENTS_AGG
+
+```{r}
+
+m <- mean(sqrt(application_train$NONLIVINGAPARTMENTS_AVG), na.rm = TRUE)
+s <- sd(sqrt(application_train$NONLIVINGAPARTMENTS_AVG), na.rm = TRUE)
+
+plot1 <- application_train %>% 
+	mutate(NONLIVINGAPARTMENTS_AGG = (sqrt(NONLIVINGAPARTMENTS_AVG) - m)/s) %>% 
+	mutate(NONLIVINGAPARTMENTS_AGG = ifelse(NONLIVINGAPARTMENTS_AGG >= 4, 0, NONLIVINGAPARTMENTS_AGG)) %>% 
+	ggplot(aes(x = (NONLIVINGAPARTMENTS_AGG), fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "dodge") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Variable Distribution") +
+	theme_bw()
+
+plot2 <- application_train %>% 
+	mutate(NONLIVINGAPARTMENTS_AGG = (sqrt(NONLIVINGAPARTMENTS_AVG) - m)/s) %>% 
+	mutate(NONLIVINGAPARTMENTS_AGG = ifelse(NONLIVINGAPARTMENTS_AGG >= 4, 0, NONLIVINGAPARTMENTS_AGG)) %>% 
+	ggplot(aes(x = (NONLIVINGAPARTMENTS_AGG), fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "fill") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Normalised Variable Distribution") +
+	theme_bw()
+
+plot1
+plot2
+```
+
+
+### LIVINGAPARTMENTS_MODE
+
+```{r}
+plot1 <- application_train %>% 
+	ggplot(aes(x = sqrt(LIVINGAPARTMENTS_MODE), fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "dodge") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Variable Distribution") +
+	theme_bw()
+
+plot2 <- application_train %>% 
+	ggplot(aes(x = sqrt(LIVINGAPARTMENTS_MODE), fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "fill") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Normalised Variable Distribution") +
+	theme_bw()
+
+plot1
+plot2
+```
+
+### LIVINGAPARTMENTS_MEDI
+
+```{r}
+plot1 <- application_train %>% 
+	ggplot(aes(x = sqrt(LIVINGAPARTMENTS_MEDI), fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "dodge") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Variable Distribution") +
+	theme_bw()
+
+plot2 <- application_train %>% 
+	ggplot(aes(x = sqrt(LIVINGAPARTMENTS_MEDI), fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "fill") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Normalised Variable Distribution") +
+	theme_bw()
+
+plot1
+plot2
+```
+
+### LIVINGAPARTMENTS_AVG
+
+```{r}
+
+median(application_train$LIVINGAPARTMENTS_AVG, na.rm = TRUE)
+
+plot1 <- application_train %>% 
+	ggplot(aes(x = sqrt(LIVINGAPARTMENTS_AVG), fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "dodge") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Variable Distribution") +
+	theme_bw()
+
+plot2 <- application_train %>% 
+	ggplot(aes(x = sqrt(LIVINGAPARTMENTS_AVG), fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "fill") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Normalised Variable Distribution") +
+	theme_bw()
+
+plot1
+plot2
+```
+
+### LIVINGAPARTMENTS_AGG
+
+```{r}
+
+plot1 <- application_train %>% 
+	mutate(LIVINGAPARTMENTS_AGG = LIVINGAPARTMENTS_AVG * LIVINGAPARTMENTS_MEDI * LIVINGAPARTMENTS_MODE) %>% 
+	mutate(LIVINGAPARTMENTS_AGG = ifelse(sqrt(LIVINGAPARTMENTS_AGG) > 0.35, 0, LIVINGAPARTMENTS_AGG)) %>% 
+	ggplot(aes(x = sqrt(LIVINGAPARTMENTS_AGG), fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "dodge") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Variable Distribution") +
+	theme_bw()
+
+plot2 <- application_train %>% 
+	mutate(LIVINGAPARTMENTS_AGG = LIVINGAPARTMENTS_AVG * LIVINGAPARTMENTS_MEDI * LIVINGAPARTMENTS_MODE) %>% 
+	mutate(LIVINGAPARTMENTS_AGG = ifelse(sqrt(LIVINGAPARTMENTS_AGG) > 0.35, 0, LIVINGAPARTMENTS_AGG)) %>% 
+	ggplot(aes(x = sqrt(LIVINGAPARTMENTS_AGG), fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "fill") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Normalised Variable Distribution") +
+	theme_bw()
+
+plot1
+plot2
+```
+
 
 ### AMT_CREDIT
 
 ```{r}
-application_train <- fread("data/application_train.csv")
-
-
 plot1 <- application_train %>% 
 	ggplot(aes(x = AMT_CREDIT, fill = as.factor(TARGET))) +
 	geom_histogram(aes(y = ..density..), colour = "black", position = "dodge") +
