@@ -11,8 +11,38 @@ library(Matrix)
 library(catboost)
 library(tictoc)
 
+
+# Custom Functions --------------------------------------------------------
+
+na_replace <- function(x){
+	if(is.vector(x) & !is.list(x)){
+		new_x <- x
+		w <- which(is.na(x))
+		y <- x[!is.na(x)]
+		for(i in w) new_x[i] <- sample(x = y, size = 1, replace = TRUE); cat(paste0("... ", floor(i/length(w)*100), "% ... \n"))
+		return(new_x)
+	}else if(is.data.frame(x)){
+		df <- as.data.frame(x)
+		ncols <- ncol(df)
+		for(i in 1:ncols){
+			cat(paste0("... ", floor(i/ncols*100), "% ... \n"))
+			x <- df[i]
+			if(sum(is.na(x)) > 0){
+				new_x <- x
+				w <- which(is.na(x))
+				y <- x[!is.na(x)]
+				for(k in w) new_x[k,] <- sample(x = y, size = 1, replace = TRUE)
+				df[i] <- new_x
+			}
+		}
+		return(df)
+	}else if(is.list(x)){
+		stop("A list can not be evaluated. Please introduce a vector instead.")
+	}else{stop("Unrecognized Format.")}
+}
+
+
 # Retrieving Data ------------------------------------------------------------
-tic()
 tr               <- fread("data/application_train.csv") %>% sample_n(1e5)
 te               <- fread("data/application_test.csv")
 bureau           <- fread("data/bureau.csv")
@@ -108,6 +138,8 @@ tr_te <- tr %>%
 	mutate_if(is.character, funs(factor(.) %>% as.integer)) %>%
 	data.table()
 
+tic()
+# COMMONAREA
 tr_te[, COMMONAREA_MODE := log10(COMMONAREA_MODE)]
 tmp <- mean(tr_te$COMMONAREA_MODE)
 tr_te[, COMMONAREA_MODE := ifelse(is.na(COMMONAREA_MODE), tmp, COMMONAREA_MODE)]
@@ -122,6 +154,8 @@ tr_te[, COMMONAREA_AGG := (COMMONAREA_AVG + COMMONAREA_MEDI + COMMONAREA_MODE)/3
 tr_te[,COMMONAREA_AVG:=NULL]
 tr_te[,COMMONAREA_MEDI:=NULL]
 tr_te[,COMMONAREA_MODE:=NULL]
+
+# NONLIVINGAPARTMENTS
 tr_te[,NONLIVINGAPARTMENTS_MEDI := ifelse(is.na(NONLIVINGAPARTMENTS_MEDI), 0, NONLIVINGAPARTMENTS_MEDI)]
 tr_te[,NONLIVINGAPARTMENTS_AVG := ifelse(is.na(NONLIVINGAPARTMENTS_AVG), 0, NONLIVINGAPARTMENTS_AVG)]
 tr_te[,NONLIVINGAPARTMENTS_MODE := ifelse(is.na(NONLIVINGAPARTMENTS_MODE), 0, NONLIVINGAPARTMENTS_MODE)]
@@ -130,9 +164,54 @@ m <- mean(sqrt(tr_te$NONLIVINGAPARTMENTS_AGG))
 s <- sd(sqrt(tr_te$NONLIVINGAPARTMENTS_AGG))
 tr_te[,NONLIVINGAPARTMENTS_AGG := (sqrt(NONLIVINGAPARTMENTS_AGG) - m)/s]
 tr_te[,NONLIVINGAPARTMENTS_AGG :=  ifelse(NONLIVINGAPARTMENTS_AGG >= 4, 0, NONLIVINGAPARTMENTS_AGG)]
+
 tr_te[,NONLIVINGAPARTMENTS_MEDI:=NULL]
 tr_te[,NONLIVINGAPARTMENTS_MODE:=NULL]
 tr_te[,NONLIVINGAPARTMENTS_AVG:=NULL]
+
+# LIVINGAPARTMENTS
+tr_te[,LIVINGAPARTMENTS_MODE := sqrt(LIVINGAPARTMENTS_MODE)]
+tr_te[,LIVINGAPARTMENTS_MEDI := sqrt(LIVINGAPARTMENTS_MEDI)]
+tr_te[,LIVINGAPARTMENTS_AVG := sqrt(LIVINGAPARTMENTS_AVG)]
+
+tmp <- median(tr_te$LIVINGAPARTMENTS_MODE, na.rm = TRUE)
+tr_te[,LIVINGAPARTMENTS_MODE := ifelse(is.na(LIVINGAPARTMENTS_MODE), tmp, LIVINGAPARTMENTS_MODE)]
+
+tmp <- median(tr_te$LIVINGAPARTMENTS_MEDI, na.rm = TRUE)
+tr_te[,LIVINGAPARTMENTS_MEDI := ifelse(is.na(LIVINGAPARTMENTS_MEDI), tmp, LIVINGAPARTMENTS_MEDI)]
+
+tmp <- median(tr_te$LIVINGAPARTMENTS_AVG, na.rm = TRUE)
+tr_te[,LIVINGAPARTMENTS_AVG := ifelse(is.na(LIVINGAPARTMENTS_AVG), tmp, LIVINGAPARTMENTS_AVG)]
+
+tr_te[,LIVINGAPARTMENTS_AGG := LIVINGAPARTMENTS_AVG * LIVINGAPARTMENTS_MEDI * LIVINGAPARTMENTS_MODE]
+
+tr_te[,LIVINGAPARTMENTS_AVG := NULL]
+tr_te[,LIVINGAPARTMENTS_MODE := NULL]
+tr_te[,LIVINGAPARTMENTS_MEDI := NULL]
+
+# FLOORS
+tr_te$FLOORSMIN_AVG <- tr_te$FLOORSMIN_AVG %>% na_replace()
+tr_te$FLOORSMIN_MODE <- tr_te$FLOORSMIN_MODE %>% na_replace()
+tr_te$FLOORSMIN_MEDI <- tr_te$FLOORSMIN_MEDI %>% na_replace()
+
+tr_te[,FLOORSMIN_AGG := FLOORSMIN_AVG + FLOORSMIN_MODE + FLOORSMIN_MEDI]
+tr_te[,FLOORSMIN_AVG := NULL]
+tr_te[,FLOORSMIN_MODE := NULL]
+tr_te[,FLOORSMIN_MEDI := NULL]
+
+tr_te$FLOORSMAX_AVG <- tr_te$FLOORSMAX_AVG %>% na_replace()
+tr_te$FLOORSMAX_MODE <- tr_te$FLOORSMAX_MODE %>% na_replace()
+tr_te$FLOORSMAX_MEDI <- tr_te$FLOORSMAX_MEDI %>% na_replace()
+
+tr_te[,FLOORSMAX_AGG := FLOORSMAX_AVG + FLOORSMAX_MODE + FLOORSMAX_MEDI]
+tr_te[,FLOORSMAX_AVG := NULL]
+tr_te[,FLOORSMAX_MODE := NULL]
+tr_te[,FLOORSMAX_MEDI := NULL]
+
+tr_te[,FLOORS := FLOORSMAX_AGG * FLOORSMIN_AGG]
+
+tr_te[,FLOORSMAX_AGG := NULL]
+tr_te[,FLOORSMIN_AGG := NULL]
 
 toc()
 

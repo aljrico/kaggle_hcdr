@@ -431,6 +431,227 @@ plot2
 ```
 
 
+### FLOORSMIN_MEDI
+
+```{r}
+plot1 <- application_train %>% 
+	ggplot(aes(x = FLOORSMIN_MEDI, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "dodge") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Variable Distribution") +
+	# scale_x_log10() +
+	theme_bw()
+
+plot2 <- application_train %>% 
+	ggplot(aes(x = FLOORSMIN_MEDI, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "fill") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Normalised Variable Distribution") +
+	# scale_x_log10() +
+	theme_bw()
+
+plot1
+plot2
+```
+
+### FLOORSMIN_MODE
+
+```{r}
+plot1 <- application_train %>% 
+	ggplot(aes(x = FLOORSMIN_MODE, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "dodge") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Variable Distribution") +
+	# scale_x_log10() +
+	theme_bw()
+
+plot2 <- application_train %>% 
+	ggplot(aes(x = FLOORSMIN_MODE, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "fill") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Normalised Variable Distribution") +
+	# scale_x_log10() +
+	theme_bw()
+
+plot1
+plot2
+```
+
+### FLOORSMIN_AVG
+
+```{r}
+plot1 <- application_train %>% 
+	ggplot(aes(x = FLOORSMIN_AVG, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "dodge") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Variable Distribution") +
+	# scale_x_log10() +
+	theme_bw()
+
+plot2 <- application_train %>% 
+	ggplot(aes(x = FLOORSMIN_AVG, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "fill") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Normalised Variable Distribution") +
+	# scale_x_log10() +
+	theme_bw()
+
+plot1
+plot2
+```
+### FLOORSMIN_AGG
+
+```{r}
+plot1 <- application_train %>% 
+	mutate(FLOORSMIN_AGG = FLOORSMIN_AVG + FLOORSMIN_MODE + FLOORSMIN_MEDI) %>% 
+	ggplot(aes(x = sqrt(FLOORSMIN_AGG), fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "dodge") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Variable Distribution") +
+	# scale_x_log10() +
+	theme_bw()
+
+plot2 <- application_train %>% 
+	mutate(FLOORSMIN_AGG = FLOORSMIN_AVG + FLOORSMIN_MODE + FLOORSMIN_MEDI) %>% 
+	ggplot(aes(x = sqrt(FLOORSMIN_AGG), fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "fill") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Normalised Variable Distribution") +
+	# scale_x_log10() +
+	theme_bw()
+
+plot1
+plot2
+```
+
+
+### FLOORSMAX_MEDI
+
+```{r}
+plot1 <- application_train %>% 
+	ggplot(aes(x = FLOORSMAX_MEDI, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "dodge") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Variable Distribution") +
+	# scale_x_log10() +
+	theme_bw()
+
+plot2 <- application_train %>% 
+	ggplot(aes(x = FLOORSMAX_MEDI, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "fill") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Normalised Variable Distribution") +
+	# scale_x_log10() +
+	theme_bw()
+
+plot1
+plot2
+```
+
+### FLOORSMAX_MODE
+
+```{r}
+plot1 <- application_train %>% 
+	ggplot(aes(x = FLOORSMAX_MODE, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "dodge") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Variable Distribution") +
+	# scale_x_log10() +
+	theme_bw()
+
+plot2 <- application_train %>% 
+	ggplot(aes(x = FLOORSMAX_MODE, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "fill") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Normalised Variable Distribution") +
+	# scale_x_log10() +
+	theme_bw()
+
+plot1
+plot2
+```
+
+### FLOORSMAX_AVG
+
+```{r}
+plot1 <- application_train %>% 
+	ggplot(aes(x = FLOORSMAX_AVG, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "dodge") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Variable Distribution") +
+	# scale_x_log10() +
+	theme_bw()
+
+plot2 <- application_train %>% 
+	ggplot(aes(x = FLOORSMAX_AVG, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "fill") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Normalised Variable Distribution") +
+	# scale_x_log10() +
+	theme_bw()
+
+plot1
+plot2
+```
+### FLOORSMAX_AGG
+
+```{r}
+plot1 <- application_train %>% 
+	mutate(FLOORSMAX_AGG = FLOORSMAX_AVG + FLOORSMAX_MODE + FLOORSMAX_MEDI) %>% 
+	ggplot(aes(x = sqrt(FLOORSMAX_AGG), fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "dodge") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Variable Distribution") +
+	# scale_x_log10() +
+	theme_bw()
+
+plot2 <- application_train %>% 
+	mutate(FLOORSMAX_AGG = FLOORSMAX_AVG + FLOORSMAX_MODE + FLOORSMAX_MEDI) %>% 
+	ggplot(aes(x = sqrt(FLOORSMAX_AGG), fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "fill") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Normalised Variable Distribution") +
+	# scale_x_log10() +
+	theme_bw()
+
+plot1
+plot2
+```
+
+### FLOORS
+
+```{r}
+plot1 <- application_train %>% 
+	mutate(FLOORSMAX_AGG = FLOORSMAX_AVG + FLOORSMAX_MODE + FLOORSMAX_MEDI) %>% 
+	mutate(FLOORSMIN_AGG = FLOORSMIN_AVG + FLOORSMIN_MODE + FLOORSMIN_MEDI) %>% 
+	mutate(FLOORS = FLOORSMAX_AGG * FLOORSMIN_AGG) %>% 
+	mutate(FLOORS = ifelse(FLOORS > 1, 1, FLOORS)) %>% 
+	mutate(FLOORS = scales::rescale(FLOORS)) %>% 
+	ggplot(aes(x = sqrt(FLOORS), fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "dodge") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Variable Distribution") +
+	# scale_x_log10() +
+	theme_bw()
+
+plot2 <- application_train %>% 
+	mutate(FLOORSMAX_AGG = FLOORSMAX_AVG + FLOORSMAX_MODE + FLOORSMAX_MEDI) %>% 
+	mutate(FLOORSMIN_AGG = FLOORSMIN_AVG + FLOORSMIN_MODE + FLOORSMIN_MEDI) %>% 
+	mutate(FLOORS = FLOORSMAX_AGG * FLOORSMIN_AGG) %>% 
+	mutate(FLOORS = ifelse(FLOORS > 1, 1, FLOORS)) %>% 
+	mutate(FLOORS = scales::rescale(FLOORS)) %>% 
+	ggplot(aes(x = sqrt(FLOORS), fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "fill") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Normalised Variable Distribution") +
+	# scale_x_log10() +
+	theme_bw()
+
+plot1
+plot2
+```
+
+
 ### AMT_CREDIT
 
 ```{r}
