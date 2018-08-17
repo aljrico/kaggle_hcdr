@@ -213,6 +213,44 @@ tr_te[,FLOORS := FLOORSMAX_AGG * FLOORSMIN_AGG]
 tr_te[,FLOORSMAX_AGG := NULL]
 tr_te[,FLOORSMIN_AGG := NULL]
 
+
+# YEARS_BUILD
+tr_te[,YEARS_BUILD := ((YEARS_BUILD_AVG + YEARS_BUILD_MEDI + YEARS_BUILD_MODE)/3)^2]
+
+tr_te[,YEARS_BUILD_AVG := NULL]
+tr_te[,YEARS_BUILD_MODE := NULL]
+tr_te[,YEARS_BUILD_MEDI := NULL]
+
+tmp <- mean(tr_te$YEARS_BUILD, na.rm = TRUE)
+
+tr_te[,YEARS_BUILD := ifelse(is.na(YEARS_BUILD), tmp, YEARS_BUILD)]
+
+
+# OWN_CAR_AGE
+tr_te[,OWN_CAR_AGE := sqrt(OWN_CAR_AGE)]
+
+tmp <- median(tr_te$OWN_CAR_AGE)
+tr_te[,OWN_CAR_AGE := ifelse(is.na(OWN_CAR_AGE), tmp, OWN_CAR_AGE)]
+
+
+# LANDAREA
+tr_te[,LANDAREA := (LANDAREA_MEDI + LANDAREA_MODE + LANDAREA_AVG)/3]
+m <- mean(tr_te$LANDAREA, na.rm = TRUE)
+s <- sd(tr_te$LANDAREA, na.rm = TRUE)
+tr_te[,LANDAREA := sqrt(sqrt((LANDAREA - m)/s))]
+
+tmp <- mean(tr_te$LANDAREA, na.rm = TRUE)
+
+tr_te[,LANDAREA := ifelse(is.na(LANDAREA), tmp, LANDAREA)]
+
+tr_te[,LANDAREA_MEDI := NULL]
+tr_te[,LANDAREA_MODE := NULL]
+tr_te[,LANDAREA_AVG := NULL]
+
+rm(tmp, m, s)
+
+
+
 toc()
 
 	mutate(na = apply(., 1, function(x) sum(is.na(x))),

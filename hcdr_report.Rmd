@@ -651,6 +651,229 @@ plot1
 plot2
 ```
 
+### YEARS_BUILD_MEDI
+
+```{r}
+plot1 <- application_train %>% 
+	ggplot(aes(x = (YEARS_BUILD_MEDI)^2, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "dodge") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Variable Distribution") +
+	# scale_x_log10() +
+	theme_bw()
+
+plot2 <- application_train %>% 
+	ggplot(aes(x = (YEARS_BUILD_MEDI)^2, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "fill") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Normalised Variable Distribution") +
+	# scale_x_log10() +
+	theme_bw()
+
+plot1
+plot2
+```
+
+### YEARS_BUILD_MODE
+
+```{r}
+plot1 <- application_train %>% 
+	ggplot(aes(x = (YEARS_BUILD_MODE)^2, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "dodge") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Variable Distribution") +
+	# scale_x_log10() +
+	theme_bw()
+
+plot2 <- application_train %>% 
+	ggplot(aes(x = (YEARS_BUILD_MODE)^2, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "fill") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Normalised Variable Distribution") +
+	# scale_x_log10() +
+	theme_bw()
+
+plot1
+plot2
+```
+
+### YEARS_BUILD_AVG
+
+```{r}
+plot1 <- application_train %>% 
+	ggplot(aes(x = (YEARS_BUILD_AVG)^2, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "dodge") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Variable Distribution") +
+	# scale_x_log10() +
+	theme_bw()
+
+plot2 <- application_train %>% 
+	ggplot(aes(x = (YEARS_BUILD_AVG)^2, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "fill") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Normalised Variable Distribution") +
+	# scale_x_log10() +
+	theme_bw()
+
+plot1
+plot2
+```
+
+### YEARS_BUILD
+
+```{r}
+plot1 <- application_train %>% 
+	ggplot(aes(x = ((YEARS_BUILD_AVG + YEARS_BUILD_MEDI + YEARS_BUILD_MODE)/3)^2, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "dodge") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Variable Distribution") +
+	# scale_x_log10() +
+	theme_bw()
+
+plot2 <- application_train %>% 
+	ggplot(aes(x = ((YEARS_BUILD_AVG + YEARS_BUILD_MEDI + YEARS_BUILD_MODE)/3)^2, fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "fill") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Normalised Variable Distribution") +
+	# scale_x_log10() +
+	theme_bw()
+
+plot1
+plot2
+```
+
+### OWN_CAR_AGE
+
+```{r}
+plot1 <- application_train %>% 
+	ggplot(aes(x = sqrt(OWN_CAR_AGE), fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "dodge") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Variable Distribution") +
+	# scale_x_log10() +
+	theme_bw()
+
+plot2 <- application_train %>% 
+	ggplot(aes(x = sqrt(OWN_CAR_AGE), fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "fill") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Normalised Variable Distribution") +
+	# scale_x_log10() +
+	theme_bw()
+
+plot1
+plot2
+```
+
+
+### LANDAREA_MODE
+```{r}
+
+m <- mean(application_train$LANDAREA_MODE, na.rm = TRUE)
+s <- sd(application_train$LANDAREA_MODE, na.rm = TRUE)
+
+plot1 <- application_train %>% 
+	ggplot(aes(x = sqrt((LANDAREA_MODE - m)/s), fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "dodge") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Variable Distribution") +
+	# scale_x_log10() +
+	theme_bw()
+
+plot2 <- application_train %>% 
+	ggplot(aes(x = sqrt((LANDAREA_MODE - m)/s), fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "fill") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Normalised Variable Distribution") +
+	# scale_x_log10() +
+	theme_bw()
+
+plot1
+plot2
+```
+
+
+### LANDAREA_AVG
+```{r}
+
+m <- mean(application_train$LANDAREA_AVG, na.rm = TRUE)
+s <- sd(application_train$LANDAREA_AVG, na.rm = TRUE)
+
+plot1 <- application_train %>% 
+	ggplot(aes(x = sqrt((LANDAREA_AVG - m)/s), fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "dodge") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Variable Distribution") +
+	# scale_x_log10() +
+	theme_bw()
+
+plot2 <- application_train %>% 
+	ggplot(aes(x = sqrt((LANDAREA_AVG - m)/s), fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "fill") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Normalised Variable Distribution") +
+	# scale_x_log10() +
+	theme_bw()
+
+plot1
+plot2
+```
+
+
+### LANDAREA_MEDI
+```{r}
+
+m <- mean(application_train$LANDAREA_MEDI, na.rm = TRUE)
+s <- sd(application_train$LANDAREA_MEDI, na.rm = TRUE)
+
+plot1 <- application_train %>% 
+	ggplot(aes(x = sqrt((LANDAREA_MEDI - m)/s), fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "dodge") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Variable Distribution") +
+	# scale_x_log10() +
+	theme_bw()
+
+plot2 <- application_train %>% 
+	ggplot(aes(x = sqrt((LANDAREA_MEDI - m)/s), fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "fill") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Normalised Variable Distribution") +
+	# scale_x_log10() +
+	theme_bw()
+
+plot1
+plot2
+```
+
+### LANDAREA
+```{r}
+
+m <- mean((application_train$LANDAREA_MEDI + application_train$LANDAREA_MODE + application_train$LANDAREA_AVG)/3, na.rm = TRUE)
+s <- sd((application_train$LANDAREA_MEDI + application_train$LANDAREA_MODE + application_train$LANDAREA_AVG)/3, na.rm = TRUE)
+
+plot1 <- application_train %>% 
+	mutate(LANDAREA = (LANDAREA_MEDI + LANDAREA_MODE + LANDAREA_AVG)/3) %>% 
+	ggplot(aes(x = sqrt(sqrt((LANDAREA - m)/s)), fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "dodge") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Variable Distribution") +
+	# scale_x_log10() +
+	theme_bw()
+
+plot2 <- application_train %>% 
+	mutate(LANDAREA = (LANDAREA_MEDI + LANDAREA_MODE + LANDAREA_AVG)/3) %>% 
+	ggplot(aes(x = sqrt(sqrt((LANDAREA - m)/s)), fill = as.factor(TARGET))) +
+	geom_histogram(aes(y = ..density..), colour = "black", position = "fill") +
+	scale_fill_hp(discrete = TRUE, house = "Slytherin", name = "TARGET") +
+	ggtitle("Normalised Variable Distribution") +
+	# scale_x_log10() +
+	theme_bw()
+
+plot1
+plot2
+```
 
 ### AMT_CREDIT
 
