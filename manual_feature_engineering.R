@@ -249,7 +249,21 @@ tr_te[,LANDAREA_AVG := NULL]
 
 rm(tmp, m, s)
 
+# BASEMENTAREA
+tr_te[,BASEMENTAREA := (BASEMENTAREA_MEDI + BASEMENTAREA_MODE + BASEMENTAREA_AVG)/3]
+m <- mean(tr_te$BASEMENTAREA, na.rm = TRUE)
+s <- sd(tr_te$BASEMENTAREA, na.rm = TRUE)
+tr_te[,BASEMENTAREA := sqrt(sqrt((BASEMENTAREA - m)/s))]
 
+tmp <- mean(tr_te$BASEMENTAREA, na.rm = TRUE)
+
+tr_te[,BASEMENTAREA := ifelse(is.na(BASEMENTAREA), tmp, BASEMENTAREA)]
+
+tr_te[,BASEMENTAREA_MEDI := NULL]
+tr_te[,BASEMENTAREA_MODE := NULL]
+tr_te[,BASEMENTAREA_AVG := NULL]
+
+rm(tmp, m, s)
 
 toc()
 
