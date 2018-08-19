@@ -263,44 +263,83 @@ tr_te[,BASEMENTAREA_MEDI := NULL]
 tr_te[,BASEMENTAREA_MODE := NULL]
 tr_te[,BASEMENTAREA_AVG := NULL]
 
-rm(tmp, m, s)
+rm(tmp,m,s)
+
+
+# EXT_SOURCE
+tr_te[,EXT_SOURCE_GEN := (sqrt(EXT_SOURCE_1) + EXT_SOURCE_2 + EXT_SOURCE_3)/3]
+
+tmp <- mean(tr_te$EXT_SOURCE_GEN, na.rm = TRUE)
+tr_te[,EXT_SOURCE_GEN := ifelse(is.na(EXT_SOURCE_GEN), tmp, EXT_SOURCE_GEN)]
+
+rm(tmp)
+
+# NONLIVINGAREA
+tr_te[,NONLIVINGAREA_AVG := NULL]
+tr_te[,NONLIVINGAREA_MODE := NULL]
+tr_te[,NONLIVINGAREA_MEDI := NULL]
+
+# AMT_CREDIT
+tr_te[,AMT_CREDIT := log10(AMT_CREDIT)]
+
+# AMT_INCOME_TOTAL
+tr_te[,AMT_INCOME_TOTAL := log10(AMT_INCOME_TOTAL)]
+
+# LOAN_INCOME_RATIO
+tr_te[,LOAN_INCOME_RATIO := log10(1 + AMT_CREDIT/AMT_INCOME_TOTAL)]
+
+# LOAN_INCOME_PROD
+tr_te[,LOAN_INCOME_PROD := log10(1 + AMT_CREDIT*AMT_INCOME_TOTAL)]
+
+# AMT_GOODS_PRICE
+tr_te[,AMT_GOODS_PRICE := log10(1 + AMT_GOODS_PRICE)]
+
+# CREDIT_TO_GOODS_RATIO
+tr_te[,CREDIT_TO_GOODS_RATIO := log10(1 + 10^AMT_CREDIT/AMT_GOODS_PRICE)]
+
+# AMT_ANNUITY
+tr_te[,AMT_ANNUITY := log10(AMT_ANNUITY)]
+
+# ANNUITY_PRESSURE
+tr_te[,ANNUITY_PRESSURE := log10(1 + 10^(AMT_ANNUITY)*AMT_CREDIT)]
+
+# INC_PER_CHILD
+tr_te[, INC_PER_CHLID := log10(1 + 10^AMT_INCOME_TOTAL / (1 + CNT_CHILDREN))]
+
+# INCOME_RATE_PER_CHILD
+tr_te[, INCOME_RATE_PER_CHILD := log10(10^AMT_INCOME_TOTAL / ((10^AMT_CREDIT)*(1 + CNT_CHILDREN^2)))]
+
+tr_te[,CNT_CHILDREN := NULL]
+
+# DAYS_EMPLOYED
+tr_te[,DAYS_EMPLOYED := ifelse(DAYS_EMPLOYED == 365243, NA, DAYS_EMPLOYED)]
+tr_te[,DAYS_EMPLOYED := sqrt(abs(DAYS_EMPLOYED))]
+
+# DAYS_EMPLOYED_PERC
+tr_te[,DAYS_EMPLOYED_PERC := DAYS_EMPLOYED/DAYS_BIRTH]
+
+# AGE_PRESSURE
+tr_te[,AGE_PRESSURE := (10^AMT_CREDIT*(-DAYS_BIRTH)/10^AMT_INCOME_TOTAL)]
+
+# DAYS_LAST_PHONE_CHANGE
+tr_te[,DAYS_LAST_PHONE_CHANGE := log10(-DAYS_LAST_PHONE_CHANGE)]
+
+# PHONE_TO_EMPLOY_RATIO
+tr_te[,PHONE_TO_EMPLOY_RATIO := sqrt(10^DAYS_LAST_PHONE_CHANGE / DAYS_EMPLOYED)]
+
+# PHONE_TO_BIRTH_RATIO
+tr_te[,PHONE_TO_BIRTH_RATIO := sqrt(10^DAYS_LAST_PHONE_CHANGE / (-DAYS_BIRTH))]
+
+# IMPULSIVITY
+tr_te[,IMPULSIVITY_PHONE := 10^DAYS_LAST_PHONE_CHANGE*AMT_INCOME_TOTAL]
+tr_te[,IMPULSIVITY_CAR := log10(1+365.25*OWN_CAR_AGE*((10^DAYS_LAST_PHONE_CHANGE))/(10^AMT_INCOME_TOTAL))]
+
+# ANNUITY_INCOME_PERC
+tr_te[,ANNUITY_INCOME_PERC := sqrt(10^AMT_ANNUITY / (1 + 10^AMT_INCOME_TOTAL))]
 
 toc()
 
-	mutate(na = apply(., 1, function(x) sum(is.na(x))),
-				 AMT_ANNUITY_LOG = log10(AMT_ANNUITY),
-				 DAYS_EMPLOYED = ifelse(DAYS_EMPLOYED == 365243, NA, DAYS_EMPLOYED),
-				 DAYS_EMPLOYED_PERC = sqrt(DAYS_EMPLOYED / DAYS_BIRTH),
-				 INCOME_CREDIT_PERC = AMT_INCOME_TOTAL / AMT_CREDIT,
-				 INCOME_PER_PERSON = log1p(AMT_INCOME_TOTAL / CNT_FAM_MEMBERS),
-				 ANNUITY_INCOME_PERC = sqrt(AMT_ANNUITY / (1 + AMT_INCOME_TOTAL)),
-				 ANNUITY_INCOME_PERC_LOG = log10(AMT_ANNUITY / (1 + AMT_INCOME_TOTAL)),
-				 ANNUITY_PRESSURE = log10(log10(AMT_CREDIT) * AMT_ANNUITY),
-				 LOAN_INCOME_RATIO = AMT_CREDIT / AMT_INCOME_TOTAL,
-				 LOAN_INCOME_RATIO_LOG = log10(AMT_CREDIT / AMT_INCOME_TOTAL),
-				 LOAN_INCOME_PROD = AMT_CREDIT * AMT_INCOME_TOTAL,
-				 LOAN_INCOME_PROD_LOG = log10(AMT_CREDIT * AMT_INCOME_TOTAL),
-				 ANNUITY_LENGTH = AMT_CREDIT / AMT_ANNUITY,
-				 CHILDREN_RATIO = CNT_CHILDREN / CNT_FAM_MEMBERS,
-				 AMT_GOODS_PRICE_LOG = log10(AMT_GOODS_PRICE),
-				 CREDIT_TO_GOODS_RATIO_EXTRA = log10(AMT_CREDIT / log10(AMT_GOODS_PRICE)),
-				 CREDIT_TO_GOODS_RATIO = AMT_CREDIT / AMT_GOODS_PRICE,
-				 INC_PER_CHLD = AMT_INCOME_TOTAL / (1 + CNT_CHILDREN),
-				 INC_PER_CHLD_LOG = log10(AMT_INCOME_TOTAL / (1 + CNT_CHILDREN)),
-				 INCOME_RATE_PER_CHILD = log10(AMT_INCOME_TOTAL / ((AMT_CREDIT)*(1 + CNT_CHILDREN^2))),
-				 SOURCES_PROD = EXT_SOURCE_1 * EXT_SOURCE_2 * EXT_SOURCE_3,
-				 SOURCES_MEAN = ((EXT_SOURCE_1 + EXT_SOURCE_2 + EXT_SOURCE_3)/3)^2,
-				 AGE_PRESSURE = log10(AMT_CREDIT*(-DAYS_BIRTH)/AMT_INCOME_TOTAL),
-				 CAR_TO_BIRTH_RATIO = OWN_CAR_AGE / DAYS_BIRTH,
-				 CAR_TO_EMPLOY_RATIO = OWN_CAR_AGE / DAYS_EMPLOYED,
-				 IMPULSIVITY = -DAYS_LAST_PHONE_CHANGE*log10(AMT_INCOME_TOTAL),
-				 IMPULSIVITY_LOG = log10(-DAYS_LAST_PHONE_CHANGE*log10(AMT_INCOME_TOTAL)),
-				 PHONE_TO_BIRTH_RATIO = DAYS_LAST_PHONE_CHANGE / DAYS_BIRTH,
-				 PHONE_TO_EMPLOY_RATIO = DAYS_LAST_PHONE_CHANGE / DAYS_EMPLOYED,
-				 PHONE_TO_EMPLOY_RATIO_LOG = log10(DAYS_LAST_PHONE_CHANGE / DAYS_EMPLOYED)) %>%
-	# select(-PHONE_TO_EMPLOY_RATIO, - IMPULSIVITY, - SOURCES_PROD, - INC_PER_CHLD, - CREDIT_TO_GOODS_RATIO, -LOAN_INCOME_PROD, -ANNUITY_INCOME_PERC, -AMT_ANNUITY) %>%
-	data.frame()
-
+# ORGANIZATIONS
 docs <- str_subset(names(tr), "FLAG_DOC")
 live <- str_subset(names(tr), "(?!NFLAG_)(?!FLAG_DOC)(?!_FLAG_)FLAG_")
 inc_by_org <- tr_te %>%
@@ -311,8 +350,8 @@ inc_by_org <- tr_te %>%
 rm(tr, te, fn, sum_bureau, sum_cc_balance,
 	 sum_payments, sum_pc_balance, sum_prev); gc()
 
+tr_te <- as_tibble(tr_te)
 tr_te %<>%
-	as_tibble() %>%
 	mutate(DOC_IND_KURT = apply(tr_te[, docs], 1, moments::kurtosis),
 				 DOC_IND_SKEW = apply(tr_te[, docs], 1, skewness),
 				 LIVE_IND_SUM = apply(tr_te[, live], 1, sum),
@@ -324,3 +363,53 @@ tr_te %<>%
 	mutate_all(funs(ifelse(is.nan(.), NA, .))) %>%
 	mutate_all(funs(ifelse(is.infinite(.), NA, .))) %>%
 	data.matrix()
+
+# Preparing Data ----------------------------------------------------------
+
+tri_val <- caret::createDataPartition(y, p = 0.9, list = F) %>% c()
+
+
+#XGB
+dtest_xgb <- xgb.DMatrix(data = tr_te[-tri, ])
+tr_te_xgb <- tr_te[tri, ]
+dtrain_xgb <- xgb.DMatrix(data = tr_te[tri, ], label = y[tri])
+dval_xgb <- xgb.DMatrix(data = tr_te_xgb[-tri_val, ], label = y[-tri_val])
+cols_xgb <- colnames(tr_te)
+
+
+rm(tr_te, tri, y); gc()
+
+
+
+# Training XGB ------------------------------------------------------------
+
+p <- list(objective = "binary:logistic",
+					booster = "gbtree",
+					eval_metric = "auc",
+					nthread = 4,
+					eta = 0.05,
+					max_depth = 6,
+					min_child_weight = 30,
+					gamma = 0,
+					subsample = 0.85,
+					colsample_bytree = 0.7,
+					colsample_bylevel = 0.632,
+					alpha = 0,
+					lambda = 0,
+					nrounds = 2000)
+
+m_xgb <- xgb.train(p, dtrain_xgb, p$nrounds, list(val = dval_xgb), print_every_n = 50, early_stopping_rounds = 300)
+
+xgb.importance(cols_xgb, model=m_xgb) %>%
+	xgb.plot.importance(top_n = 50)
+
+
+
+# Predicting XGB ----------------------------------------------------------
+
+read_csv("data/sample_submission.csv") %>%
+	mutate(SK_ID_CURR = as.integer(SK_ID_CURR),
+				 TARGET = predict(m_xgb, dtest_xgb)) %>%
+	write_csv(paste0("submit/tidy_xgb_", round(m_xgb$best_score, 5), ".csv"))
+
+
