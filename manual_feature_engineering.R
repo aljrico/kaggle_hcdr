@@ -3,12 +3,9 @@ library(data.table)
 library(xgboost)
 library(magrittr)
 library(moments)
-library(harrypotter)
 library(randomForest)
-library(lightgbm)
 library(caret)
 library(Matrix)
-library(catboost)
 library(tictoc)
 
 
@@ -43,7 +40,7 @@ na_replace <- function(x){
 
 
 # Retrieving Data ------------------------------------------------------------
-tr               <- fread("data/application_train.csv") %>% sample_n(1e5)
+tr               <- fread("data/application_train.csv") %>% sample_n(5e4)
 te               <- fread("data/application_test.csv")
 bureau           <- fread("data/bureau.csv")
 bbalance         <- fread("data/bureau_balance.csv")
@@ -190,18 +187,18 @@ tr_te[,LIVINGAPARTMENTS_MODE := NULL]
 tr_te[,LIVINGAPARTMENTS_MEDI := NULL]
 
 # FLOORS
-tr_te$FLOORSMIN_AVG <- tr_te$FLOORSMIN_AVG %>% na_replace()
-tr_te$FLOORSMIN_MODE <- tr_te$FLOORSMIN_MODE %>% na_replace()
-tr_te$FLOORSMIN_MEDI <- tr_te$FLOORSMIN_MEDI %>% na_replace()
+# tr_te$FLOORSMIN_AVG <- tr_te$FLOORSMIN_AVG %>% na_replace()
+# tr_te$FLOORSMIN_MODE <- tr_te$FLOORSMIN_MODE %>% na_replace()
+# tr_te$FLOORSMIN_MEDI <- tr_te$FLOORSMIN_MEDI %>% na_replace()
 
 tr_te[,FLOORSMIN_AGG := FLOORSMIN_AVG + FLOORSMIN_MODE + FLOORSMIN_MEDI]
 tr_te[,FLOORSMIN_AVG := NULL]
 tr_te[,FLOORSMIN_MODE := NULL]
 tr_te[,FLOORSMIN_MEDI := NULL]
 
-tr_te$FLOORSMAX_AVG <- tr_te$FLOORSMAX_AVG %>% na_replace()
-tr_te$FLOORSMAX_MODE <- tr_te$FLOORSMAX_MODE %>% na_replace()
-tr_te$FLOORSMAX_MEDI <- tr_te$FLOORSMAX_MEDI %>% na_replace()
+# tr_te$FLOORSMAX_AVG <- tr_te$FLOORSMAX_AVG %>% na_replace()
+# tr_te$FLOORSMAX_MODE <- tr_te$FLOORSMAX_MODE %>% na_replace()
+# tr_te$FLOORSMAX_MEDI <- tr_te$FLOORSMAX_MEDI %>% na_replace()
 
 tr_te[,FLOORSMAX_AGG := FLOORSMAX_AVG + FLOORSMAX_MODE + FLOORSMAX_MEDI]
 tr_te[,FLOORSMAX_AVG := NULL]
@@ -387,7 +384,7 @@ p <- list(objective = "binary:logistic",
 					booster = "gbtree",
 					eval_metric = "auc",
 					nthread = 4,
-					eta = 0.05,
+					eta = 0.001,
 					max_depth = 6,
 					min_child_weight = 30,
 					gamma = 0,
@@ -411,5 +408,79 @@ read_csv("data/sample_submission.csv") %>%
 	mutate(SK_ID_CURR = as.integer(SK_ID_CURR),
 				 TARGET = predict(m_xgb, dtest_xgb)) %>%
 	write_csv(paste0("submit/tidy_xgb_", round(m_xgb$best_score, 5), ".csv"))
+
+
+# Hyperparameter Tuning XGB---------------------------------------------------
+#---------------------------
+
+
+parameterList <- expand.grid(subsample = seq(from = 0.5, to = 1, by = 0.25),
+														 colsample_bytree = seq(from = 0.4, to = 1, by = 0.2),
+														 lr = seq(from = 2, to = 10, by = 1),
+														 mtd = seq(from = 4, to = 10, by = 2))
+ntrees <- 100
+
+scores <- c()
+
+rmseErrorsHyperparameters <- for(i in 1:nrow(parameterList)){
+
+	#Extract Parameters to test
+	currentSubsampleRate <- parameterList[["subsample"]][[i]]
+	currentColsampleRate <- parameterList[["colsample_bytree"]][[i]]
+	lr <- parameterList[["lr"]][[i]]
+	mtd <- parameterList[["mtd"]][[i]]
+
+	p <- list(objective = "binary:logistic",
+						booster = "gbtree",
+						eval_metric = "auc",
+						nthread = 4,
+						eta = lr/ntrees,
+						max_depth = mtd,
+						min_child_weight = 30,
+						gamma = 0,
+						subsample = currentSubsampleRate,
+						colsample_bytree = currentColsampleRate,
+						colsample_bylevel = 0.632,
+						alpha = 0,
+						lambda = 0,
+						nrounds = ntrees)
+	tic()
+	xgb_cv <- xgb.cv(p, dtrain_xgb, p$nrounds, print_every_n = 5, early_stopping_rounds = 25, nfold = 5)
+	toc()
+	cat(paste0("... ", i/nrow(parameterList)*100, " (%)  ... \n"))
+	scores[i] <- xgb_cv$evaluation_log$test_auc_mean %>% max()
+}
+
+m <- which.max(scores)
+currentSubsampleRate <- parameterList[["subsample"]][[m]]
+currentColsampleRate <- parameterList[["colsample_bytree"]][[m]]
+lr <- parameterList[["lr"]][[m]]
+mtd <- parameterList[["mtd"]][[m]]
+
+ntrees <- 2000
+p <- list(objective = "binary:logistic",
+					booster = "gbtree",
+					eval_metric = "auc",
+					nthread = 4,
+					eta = lr/ntrees,
+					max_depth = mtd,
+					min_child_weight = 30,
+					gamma = 0,
+					subsample = currentSubsampleRate,
+					colsample_bytree = currentColsampleRate,
+					colsample_bylevel = 0.632,
+					alpha = 0,
+					lambda = 0,
+					nrounds = ntrees)
+
+m_xgb <- xgb.train(p, dtrain_xgb, p$nrounds, list(val = dval_xgb), print_every_n = 50, early_stopping_rounds = 500)
+xgb.importance(cols_xgb, model=m_xgb) %>%
+	xgb.plot.importance(top_n = 50)
+
+read_csv("data/sample_submission.csv") %>%
+	mutate(SK_ID_CURR = as.integer(SK_ID_CURR),
+				 TARGET = predict(m_xgb, dtest_xgb)) %>%
+	write_csv(paste0("submit/tuned_xgb_", round(m_xgb$best_score, 5), ".csv"))
+
 
 

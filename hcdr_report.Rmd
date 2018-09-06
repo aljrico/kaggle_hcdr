@@ -37,9 +37,7 @@ library(waffle)
 library(viridis)
 library(devtools)
 library(gridExtra)
-devtools::install_github("aljrico/harrypotter")
 library(harrypotter)
-
 ```
 
 # Retrieving Data

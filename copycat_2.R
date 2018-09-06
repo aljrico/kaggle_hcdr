@@ -361,9 +361,9 @@ rmseErrorsHyperparameters <- for(i in 1:nrow(parameterList)){
 						lambda = 0,
 						nrounds = ntrees)
 
-	xgb_model <- xgb.train(p, dtrain, p$nrounds, list(val = dval), print_every_n = 5, early_stopping_rounds = 50)
+	xgb_cv <- xgb.cv(p, dtrain_xgb, p$nrounds, print_every_n = 5, early_stopping_rounds = 25, nfold = 5)
 	cat(paste0("... ", i/nrow(parameterList)*100, " (%)  ... \n"))
-	scores[i] <- xgb_model$best_score
+	scores[i] <- xgb_cv$evaluation_log$test_auc_mean %>% max()
 }
 
 m <- which.max(scores)
